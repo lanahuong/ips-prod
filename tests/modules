@@ -1,0 +1,2 @@
+
+TEST_MODULES += testsHermite testsSolverSchrodinger testsOrthogonalityChecker testsDerivator

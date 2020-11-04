@@ -1,0 +1,500 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Presentation template</title>
+    <meta charset="utf-8"/>
+    <link href="core/fonts/mono.css" rel="stylesheet" type="text/css">
+    <link href="core/css/animate.css" rel="stylesheet" type="text/css">
+    <link href="core/css/style_core.css" rel="stylesheet" type="text/css">
+    <link href="core/css/mermaid.css" rel="stylesheet" type="text/css">
+    <link href="core/css/gitgraph.css" rel="stylesheet" type="text/css">
+    <link href="core/css/style_ensiie.css" rel="stylesheet" type="text/css">
+    <link href="core/css/katex.css" rel="stylesheet" type="text/css">
+    <link href="core/css/asciinema-player.css" rel="stylesheet" type="text/css">
+
+
+</head>
+<body>
+<textarea id="source" readonly>
+class: titlepage
+
+.title[
+Projet n°1 d'IPS
+]
+
+.subtitle[
+G. Mézière - M. Migdal - L. Scravaglieri -- ENSIIE -- 2020
+]
+---
+layout: true
+class: animated fadeIn middle numbers
+
+.footnote[
+Presentation template - N. Dubray - ENSIIE - 2020 - [:book:](../index.html)
+]
+
+---
+
+# 
+
+---
+
+class: toc top
+# Table des matières
+
+1. Organisation du projet
+--
+
+  1. Arboresence
+--
+
+  2. Classes
+--
+
+2. Chaine de compilation
+
+--
+
+3. Documentation
+
+--
+
+4. Extraits de code et tests unitaires
+  1. Code
+  2. Quadrature
+  3. Tests unitaires
+
+--
+
+5. Git
+
+--
+
+6. Résultats
+
+
+---
+
+class: toc top
+
+# 1 - Arborescence
+
+
+1. `src`
+
+--
+
+2. `tests`
+
+--
+
+3. `scripts`
+
+--
+
+4. `doc`
+
+--
+
+5. `gtest`
+
+
+---
+
+# 1 -  Classes
+
+![](images/class-diagram.png)
+
+
+---
+
+class: top
+
+# 2 - Chaine de compilation
+
+--
+
+Chaîne de compilation séparée en deux parties :
+* Solveur
+* GoogleTest
+
+--
+
+Approche modulaire 
+
+--
+
+Tous les modules doivent être déclarés au préalale dans les fichiers `module`.
+
+---
+
+# 3 - Documentation
+
+--
+* Doxygen
+
+--
+* EXTRACT_PRIVATE = YES
+
+--
+* INPUT += README.md
+* USE_MDFILE_AS_MAINPAGE = README.md
+
+--
+* EXCLUDE = src/hermiteCoefs.h
+
+---
+
+# 3 - Documentation
+
+![](images/index.png)
+
+---
+
+# 3 - Documentation
+
+![](images/orthocheck.png)
+
+---
+
+# 4 - Code
+
+```markdown
+void Derivator::differentiateTwice(arma::mat &m) {
+        arma::uword n = m.n_cols;
+        arma::mat M1 = m;
+        arma::mat M2 = m;
+
+        if (likely(n > 2)) {
+
+            M1.shed_col(0);
+            M1.insert_cols(n - 1, 1);
+            
+            M2.shed_col(n - 1);
+            M2.insert_cols(0, 1);
+        
+            m = (M1 + M2 - 2 * m) / (STEP * STEP);
+        }
+
+        else {
+
+            m = arma::zeros(size(m));
+        }
+}
+```
+
+
+
+`$$ (x_1, x_2, ... , x_n)  \longrightarrow (\frac{0 + x_2 - 2  x_1}{h^2}, \frac{x_1 + x_3 - 2  x_2}{h^2}, ... , \frac{x_{n-1} + 0 -2  x_n}{h^2})   $$`
+---
+
+# 4 - Code
+
+```markdown
+void Derivator::correctBounds(arma::mat &m) {
+    arma::uword n = m.n_cols;
+
+    if (likely(n > 2)) {
+
+        m.shed_col(n - 1);
+        m.shed_col(0);
+    }
+}
+```
+
+`$$  (\frac{0 + x_2 - 2  x_1}{h^2}, \frac{x_1 + x_3 - 2  x_2}{h^2},\frac{x_2 + x_4 - 2  x_3}{h^2}, ... ,\frac{x_{n-2} + x_n -2  x_{n-1}}{h^2}, \frac{x_{n-1} + 0 -2  x_n}{h^2}) \\[0.4cm] \downarrow \\[0.4cm]  
+(\frac{x_1 + x_3 - 2  x_2}{h^2}, \frac{x_2 + x_4 - 2  x_3}{h^2}, ... , \frac{x_{n-2} + x_n -2  x_{n-1}}{h^2})  $$`
+---
+
+class: top
+
+# 4 - Quadrature
+
+On veut vérifier que `$ I_{a, b} = \delta_{a, b} $` avec :
+`$$ I_{a, b} = \int \psi_a \psi_b \text{e}^{-\alpha z^2} = k_a k_b \int_{z_\text{min}}^{z_\text{max}}  H_a(z)H_b(z) \text{e}^{-\alpha z^2} \text{d}z $$`
+où on a noté `$\alpha = \frac{m \omega}{h}$` et `$k_a = \frac{1}{\sqrt{2^a a!}}{\left(\frac{\alpha}{\pi} \right)}^{\frac{1}{4}} $`.
+--
+Après un changement de variable (formaliste mais inutile si on prend tous les paramètres égaux à 1 de toutes façons...), on a :
+`$$ I_{a, b} = k_a k_b \int_{\sqrt{\alpha}z_\text{min}}^{\sqrt{\alpha}z_\text{max}}  H_a(z)H_b(z) \text{e}^{-z^2} \frac{\text{d}z}{\alpha} = k_a k_b \sum_{i = 0}^{N-1} \omega_i  H_a\left(\frac{x_i}{\sqrt{\alpha}} \right)H_b\left(\frac{x_i}{\sqrt{\alpha}} \right)    $$`
+--
+
+* `$k_n$` = `pseudoFactorials.at(n)`
+* `$Vect \left( H_n\left(\frac{x_i}{\sqrt{\alpha}} \right), \forall i \in [0, N-1]   \right)$`   = `hermiteMatrix.row(n)`
+* `$Vect \left( \omega_i , \forall i \in [0, N-1]  \right)$` = `getWeightVector()`
+
+--
+
+Pour la quadrature : `make coefs`
+
+
+---
+
+class: top
+
+# 4 - Quadrature - Profilage du code
+
+Valeurs pré-calculables indépendantes de `$I_{a, b} $` -> classe instanciée:
+
+--
+
+Maximum de constantes dans `constants.h` et `hermiteCoefs.h` > "constant folding"
+
+--
+
+![](images/prof100.png)
+
+
+![](images/prof1000.png)
+
+
+---
+# 4 - Tests unitaires
+
+GoogleTest
+
+--
+
+Tests paramétrés
+
+--
+
+.numbers[
+```c++
+/**
+ * @struct define the parameter of SolutionBoundedTest
+ */
+struct solution_bounded_state {
+    double zmin;
+    double zmax;
+    uint n;
+    // expected number of rows in the resulting matrix
+    uint length;
+
+    /**
+     * @brief format when printing a solution_bounded_state object
+     */
+    friend std::ostream &operator<<(std::ostream &os, const solution_bounded_state &state)
+    {
+      os << "zmin=" << state.zmin << "; zmax=" << state.zmax;
+      os << "; n=" << state.n << "; length=" << state.length << "}\n";
+      return os;
+    }
+};
+```
+]
+
+---
+
+# 4 - Tests unitaires
+
+.numbers[
+```cpp
+/**
+ * @class SolutionBoundedTest
+ * This class defines parameterized tests using instances of solution_bounded_state as parameter
+ */
+class SolutionBoundedTest : public testing::TestWithParam<solution_bounded_state> {
+ public:
+  SolutionBoundedTest()
+  = default;;
+};
+
+/**
+ * @brief Creates an instance of SolutionBoundedTest that will run the given test
+ */
+TEST_P(SolutionBoundedTest, solutionSize)
+{
+  solution_bounded_state state = GetParam();
+  arma::mat result = SolverSchrodinger::solve1D(state.zmin, state.zmax, state.n);
+
+  EXPECT_EQ(state.n + 1, result.n_rows);
+  EXPECT_EQ(state.length, result.n_cols);
+}
+
+/**
+ * Run all SolutionBoundedTest tests with given values
+ */
+INSTANTIATE_TEST_SUITE_P(BasicCases, SolutionBoundedTest, testing::Values(
+    solution_bounded_state{-1, 1, 1, uint((2 / STEP) + 1)},
+    solution_bounded_state{-10, 10, 1, uint((20 / STEP) + 1)},
+    solution_bounded_state{-1, 1, 4, uint((2 / STEP) + 1)}
+));
+```
+]
+
+---
+
+# 5 - Git
+ Git History (tig)
+
+ .hcenter.w83[
+![](../pres/images/git_history.png)
+]
+
+
+---
+
+class: center
+
+# 6 - Résultats
+
+.w80.hcenter[
+![](images/Figure_1.png)
+]
+
+
+---
+
+class: center
+
+# 6 - Résultats
+
+.w60.hcenter[
+![](images/gcov.png)
+]
+
+
+
+
+
+
+</textarea>
+
+<script src="core/javascript/remark.js"></script>
+<script src="core/javascript/katex.min.js"></script>
+<script src="core/javascript/auto-render.min.js"></script>
+<script src="core/javascript/emojify.js"></script>
+<script src="core/javascript/mermaid.js"></script>
+<script src="core/javascript/jquery-2.1.1.min.js"></script>
+<script src="core/javascript/extend-jquery.js"></script>
+<script src="core/javascript/gitgraph.js"></script>
+<script src="core/javascript/plotly.js"></script>
+<script src="core/javascript/asciinema-player.js"></script>
+<script src="core/javascript/bokeh-2.2.1.min.js"></script>
+<script src="core/javascript/bokeh-widgets-2.2.1.min.js"></script>
+<script src="core/javascript/bokeh-tables-2.2.1.min.js"></script>
+<script src="core/javascript/bokeh-api-2.2.1.min.js"></script>
+
+<script>
+
+    // === Remark.js initialization ===
+    var slideshow = remark.create(
+        {
+            highlightStyle: 'monokai',
+            countIncrementalSlides: false,
+            highlightLines: false
+        });
+
+    // === Mermaid.js initialization ===
+    mermaid.initialize({
+        startOnLoad: false,
+        cloneCssStyles: false,
+        flowchart: {
+            height: 50
+        },
+        sequenceDiagram: {
+            width: 110,
+            height: 30
+        }
+    });
+
+    function initMermaid(s) {
+        var diagrams = document.querySelectorAll('.mermaid');
+        var i;
+        for (i = 0; i < diagrams.length; i++) {
+            if (diagrams[i].offsetWidth > 0) {
+                mermaid.init(undefined, diagrams[i]);
+            }
+        }
+    }
+
+    slideshow.on('afterShowSlide', initMermaid);
+    initMermaid(slideshow.getSlides()[slideshow.getCurrentSlideIndex()]);
+
+
+    // === Emojify.js initialization ===
+    emojify.run();
+
+    // KaTeX
+    renderMathInElement(document.body, {
+        delimiters: [{left: "$$", right: "$$", display: true}, {left: "$", right: "$", display: false}],
+        ignoredTags: ["script", "noscript", "style", "textarea", "pre"]
+    });
+
+
+    // Bokeh.js example #00
+
+    var plt = Bokeh.Plotting;
+
+    var pie_data = {
+        labels: ['Work', 'Eat', 'Commute', 'Sport', 'Watch TV', 'Sleep'],
+        values: [8, 2, 2, 4, 0, 8],
+    };
+
+    var p1 = Bokeh.Charts.pie(pie_data);
+    var p2 = Bokeh.Charts.pie(pie_data, {
+        inner_radius: 0.2,
+        start_angle: Math.PI / 2
+    });
+    var p3 = Bokeh.Charts.pie(pie_data, {
+        inner_radius: 0.2,
+        start_angle: Math.PI / 6,
+        end_angle: 5 * Math.PI / 6
+    });
+    var p4 = Bokeh.Charts.pie(pie_data, {
+        inner_radius: 0.2,
+        palette: "Oranges9",
+        slice_labels: "percentages"
+    });
+
+    // add the plot to a document and display it
+    var doc = new Bokeh.Document();
+    doc.add_root(plt.gridplot(
+        [[p1, p2], [p3, p4]],
+        {plot_width: 250, plot_height: 250}));
+    Bokeh.embed.add_document_standalone(doc, document.getElementById("bokeh00"));
+
+    // Bokeh.js example #01
+
+    var plt = Bokeh.Plotting;
+
+    var bar_data = [
+        ['City', '2010 Population', '2000 Population'],
+        ['NYC', 8175000, 8008000],
+        ['LA', 3792000, 3694000],
+        ['Chicago', 2695000, 2896000],
+        ['Houston', 2099000, 1953000],
+        ['Philadelphia', 1526000, 1517000],
+    ];
+
+    var p1 = Bokeh.Charts.bar(bar_data, {
+        axis_number_format: "0.[00]a"
+    });
+    var p2 = Bokeh.Charts.bar(bar_data, {
+        axis_number_format: "0.[00]a",
+        stacked: true
+    });
+    var p3 = Bokeh.Charts.bar(bar_data, {
+        axis_number_format: "0.[00]a",
+        orientation: "vertical"
+    });
+    var p4 = Bokeh.Charts.bar(bar_data, {
+        axis_number_format: "0.[00]a",
+        orientation: "vertical",
+        stacked: true
+    });
+
+    var doc = new Bokeh.Document();
+    doc.add_root(plt.gridplot(
+        [[p1, p2], [p3, p4]],
+        {plot_width: 250, plot_height: 250}));
+    Bokeh.embed.add_document_standalone(doc, document.getElementById("bokeh01"));
+
+    // ===== END =====
+
+</script>
+<script src="gitgraphs.js" type="text/javascript"></script>
+</body>
+</html>
+
