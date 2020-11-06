@@ -28,15 +28,15 @@
 class Poly {
 private:
   arma::mat hermitePolynomial;
+  arma::cube laguerrePolynomial;
 
 public:
   /**
    * @brief Iteratively evaluate the Hermite polynomial on a vector
    * @param nMax max degree to compute
    * @param zRowvec input vector
-   * @return an matrix where each row corresponds to a degree
    */
-  void calcHermite(uint nMax, const arma::rowvec &zRowvec);
+  void calcHermite(uint nMax, const arma::vec &zRowvec);
 
   /**
    * @brief Get the Hermite polynomial previously computed of rank n-1

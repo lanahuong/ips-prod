@@ -1,6 +1,6 @@
 #include "Poly.h"
 
-void Poly::calcHermite(uint nMax, const arma::rowvec &zRowvec) {
+void Poly::calcHermite(uint nMax, const arma::vec &zRowvec) {
   /**
    * If the parameters are nonsense the matrix (0) is returned
    */
@@ -8,7 +8,7 @@ void Poly::calcHermite(uint nMax, const arma::rowvec &zRowvec) {
   hermitePolynomial = arma::mat(nMax + 1, rowLen, arma::fill::zeros);
   hermitePolynomial.row(0) = arma::vec(rowLen, arma::fill::ones).t();
   if (likely(nMax > 0)) {
-    hermitePolynomial.row(1) = 2 * zRowvec;
+    hermitePolynomial.row(1) = 2 * zRowvec.t();
     for (arma::uword i = 2; i <= nMax; i++) {
       hermitePolynomial.row(i) =
           hermitePolynomial.row(1) % hermitePolynomial.row(i - 1) -
@@ -17,4 +17,4 @@ void Poly::calcHermite(uint nMax, const arma::rowvec &zRowvec) {
   }
 }
 
-arma::vec Poly::hermite(int n) { return hermitePolynomial.row(n); }
+arma::vec Poly::hermite(int n) { return hermitePolynomial.row(n).t(); }
