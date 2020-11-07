@@ -20,8 +20,8 @@ TEST(PolyClass, Mandatory) {
                 1.98557479e+06,  1.50339793e+07};
   ASSERT_NEAR(arma::norm(calcVals / targetVals - 1.0), 0.0, 1e-08);
 
-  /*
-  zVals = {0.1, 0.3, 1.2, 1.8, 2.0, 2.5, 7.1, 11.1};
+
+    zVals = {0.1, 0.3, 1.2, 1.8, 2.0, 2.5, 7.1, 11.1};
   poly.calcLaguerre(6, 4, zVals); // compute generalized Laguerre polynomials
                                   // for m in {0 ... 5} and n in {0 ... 3}
   calcVals = poly.laguerre(4, 2); // m = 4, n = 2
@@ -32,5 +32,5 @@ TEST(PolyClass, Mandatory) {
   targetVals = {53.23983333, 47.95550000, 27.87200000, 17.5880,
                 14.66666667, 8.39583333,  -0.81183333, 10.1015};
   ASSERT_NEAR(arma::norm(calcVals / targetVals - 1.0), 0.0, 1e-08);
-  */
+
 }
