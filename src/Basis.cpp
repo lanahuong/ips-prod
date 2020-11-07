@@ -3,29 +3,27 @@
 #include "constants.h"
 
 
-arma::mat Basis::basisFunc(int m, int n, int nz, const arma::vec &rVec, const arma::vec &zVec) const {
-    return rPart(rVec, m, n).as_row() * zPart(zVec, nz).as_col();
+arma::mat Basis::basisFunc(int m, int n, int nz, const arma::vec &rVec, const arma::vec &zVec) {
+    return zPart(zVec, nz).as_col() * rPart(rVec, m, n).as_row();
 }
 
-arma::vec Basis::zPart(const arma::vec &zVec, int nz) const {
+arma::vec Basis::zPart(const arma::vec &zVec, int nz) {
     long double const_factor = pow(bz, -0.5) * pow(PI, -0.25);
     for (int i = 1; i <= nz; i++) const_factor *= pow(2 * i, -0.5);
     arma::vec squared_arg = arma::square(zVec / bz);
     arma::vec exp = arma::exp(-squared_arg / 2.0);
-    Poly poly;
     poly.calcHermite(nz + 1, zVec / bz);
     return const_factor * exp % poly.hermite(nz);
 
 }
 
-arma::vec Basis::rPart(const arma::vec &rVec, int m, int n) const {
+arma::vec Basis::rPart(const arma::vec &rVec, int m, int n) {
     int abs_m = floor(m);
     long double const_factor = pow(br, -1) * pow(PI, -0.5);
     for (int i = n + 1; i <= abs_m + n; i++) const_factor *= pow(i, -0.5);
     arma::vec squared_arg = arma::square(rVec / br);
     arma::vec exp = arma::exp(-squared_arg / 2.0);
     arma::vec pow = arma::pow(rVec / br, abs_m);
-    Poly poly;
     poly.calcLaguerre(abs_m + 1, n + 1, squared_arg);
     return const_factor * exp % pow % poly.laguerre(abs_m, n);
 }

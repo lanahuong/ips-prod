@@ -34,7 +34,7 @@ public:
      * @param n Principal quantum number
      * @return
      */
-    arma::vec rPart(const arma::vec &rVec, int m, int n) const;
+    arma::vec rPart(const arma::vec &rVec, int m, int n);
 
     /**
      *
@@ -42,7 +42,7 @@ public:
      * @param nz
      * @return
      */
-    arma::vec zPart(const arma::vec &zVec, int nz) const;
+    arma::vec zPart(const arma::vec &zVec, int nz);
 
     /**
      *
@@ -53,7 +53,7 @@ public:
      * @param zVec Vector of r[j]
      * @return a matrix where Mat(i,j) corresponds to \f$ \Psi_{m_a, n_a, n_{za}} (r_i, z_j) \f$
      */
-    arma::mat basisFunc(int m, int n, int nz, const arma::vec &rVec, const arma::vec &zVec) const;
+    arma::mat basisFunc(int m, int n, int nz, const arma::vec &rVec, const arma::vec &zVec);
 
 private:
 

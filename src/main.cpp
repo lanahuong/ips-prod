@@ -35,7 +35,7 @@ int main()
 
     NuclearDensityCalculator nuclearDensityCalculator;
     nuclearDensityCalculator.printRhoDefs();
-
-
+    arma::mat res = nuclearDensityCalculator.naive_method(arma::regspace(-10, 10), arma::regspace(-10, 10));
+    res.print();
     return 0;
 }

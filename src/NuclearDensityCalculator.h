@@ -11,7 +11,7 @@ private:
     double Q = 1.3;
     double br = 1.935801664793151;
     double bz = 1.829683956491218;
-    arma::mat importer_rho_values;
+    arma::mat imported_rho_values;
     Basis basis;
 
     static double rho(int m, int n, int n_z, int mp, int np, int n_zp);
