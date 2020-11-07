@@ -34,9 +34,9 @@ public:
   /**
    * @brief Iteratively evaluate the Hermite polynomial on a vector
    * @param nMax max degree to compute
-   * @param zRowvec input vector
+   * @param vec input vector
    */
-  void calcHermite(uint nMax, const arma::vec &zRowvec);
+  void calcHermite(uint nMax, const arma::vec &vec);
 
   /**
    * @brief Get the Hermite polynomial previously computed of rank n-1
