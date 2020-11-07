@@ -9,13 +9,29 @@ include_directories(${ARMADILLO_INCLUDE_DIRS})
 
 
 #MAIN
-add_executable(main src/Hermite.cpp src/main.cpp src/SolverSchrodinger.cpp src/Derivator.cpp src/OrthogonalityChecker.cpp src/Saver.cpp)
+add_executable(main
+        src/Poly.cpp src/Poly.h
+        src/main.cpp
+        src/SolverSchrodinger.cpp src/SolverSchrodinger.h
+        src/Derivator.cpp src/Derivator.h
+        src/basis.h
+        src/OrthogonalityChecker.cpp src/OrthogonalityChecker.h
+        src/Saver.cpp src/Saver.h
+        src/constants.h
+        )
 target_link_libraries(main ${ARMADILLO_LIBRARIES})
 target_compile_options(main ${COMPILE_OPTIONS})
 
 #TESTS
-add_executable(tests src/Hermite.cpp src/OrthogonalityChecker.cpp src/SolverSchrodinger.cpp src/Derivator.cpp
-        tests/testsHermite.cpp tests/testsSolverSchrodinger.cpp tests/testsOrthogonalityChecker.cpp tests/testsDerivator.cpp)
+add_executable(tests src/Poly.cpp src/Poly.h
+        src/SolverSchrodinger.cpp src/SolverSchrodinger.h
+        src/Derivator.cpp src/Derivator.h
+        src/basis.h
+        src/OrthogonalityChecker.cpp src/OrthogonalityChecker.h
+        src/Saver.cpp src/Saver.h
+        src/constants.h
+        tests/testsSolverSchrodinger.cpp tests/testsOrthogonalityChecker.cpp tests/testsDerivator.cpp
+        tests/testsMandatory.cpp)
 target_link_libraries(tests ${ARMADILLO_LIBRARIES})
 target_compile_options(tests ${COMPILE_OPTIONS})
 target_link_libraries(tests gtest_main)
