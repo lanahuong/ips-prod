@@ -1,5 +1,6 @@
 // Mandatory test #00 - Hermite and Laguerre polynomials
 #include "../src/Poly.h"
+#include "../src/Basis.h"
 #include <gtest/gtest.h>
 
 TEST(PolyClass, Mandatory) {
@@ -25,12 +26,39 @@ TEST(PolyClass, Mandatory) {
   poly.calcLaguerre(6, 4, zVals); // compute generalized Laguerre polynomials
                                   // for m in {0 ... 5} and n in {0 ... 3}
   calcVals = poly.laguerre(4, 2); // m = 4, n = 2
-  targetVals = {14.405, 13.245, 8.52, 5.82, 5., 3.125, -2.395, 10.005};
-  ASSERT_NEAR(arma::norm(calcVals / targetVals - 1.0), 0.0, 1e-08);
+    targetVals = {14.405, 13.245, 8.52, 5.82, 5., 3.125, -2.395, 10.005};
+    ASSERT_NEAR(arma::norm(calcVals / targetVals - 1.0), 0.0, 1e-08);
 
-  calcVals = poly.laguerre(5, 3); // m = 5, n = 3
-  targetVals = {53.23983333, 47.95550000, 27.87200000, 17.5880,
-                14.66666667, 8.39583333,  -0.81183333, 10.1015};
-  ASSERT_NEAR(arma::norm(calcVals / targetVals - 1.0), 0.0, 1e-08);
+    calcVals = poly.laguerre(5, 3); // m = 5, n = 3
+    targetVals = {53.23983333, 47.95550000, 27.87200000, 17.5880,
+                  14.66666667, 8.39583333, -0.81183333, 10.1015};
+    ASSERT_NEAR(arma::norm(calcVals / targetVals - 1.0), 0.0, 1e-08);
 
+}
+
+
+TEST(Basis, Mandatory) {
+
+// Mandatory test #01 - Basis truncation
+//     br = 1.935801664793151, bz = 2.829683956491218, N = 14, Q = 1.3
+    Basis basis(1.935801664793151, 2.829683956491218, 14, 1.3);
+    ASSERT_EQ(basis.mMax, 14);
+    arma::ivec nMax = {7, 7, 6, 6, 5, 5, 4, 4, 3, 3, 2, 2, 1, 1};
+    ASSERT_TRUE((basis.nMax - nMax).is_zero());
+    arma::imat n_zMax = {{18, 15, 13, 10, 7, 5, 2},
+                         {16, 14, 11, 9,  6, 3, 1},
+                         {15, 13, 10, 7,  5, 2, 0},
+                         {14, 11, 9,  6,  3, 1, 0},
+                         {13, 10, 7,  5,  2, 0, 0},
+                         {11, 9,  6,  3,  1, 0, 0},
+                         {10, 7,  5,  2,  0, 0, 0},
+                         {9,  6,  3,  1,  0, 0, 0},
+                         {7,  5,  2,  0,  0, 0, 0},
+                         {6,  3,  1,  0,  0, 0, 0},
+                         {5,  2,  0,  0,  0, 0, 0},
+                         {3,  1,  0,  0,  0, 0, 0},
+                         {2,  0,  0,  0,  0, 0, 0},
+                         {1,  0,  0,  0,  0, 0, 0}};
+    //check if matrices are equal
+    ASSERT_TRUE((basis.n_zMax - n_zMax).is_zero());
 }

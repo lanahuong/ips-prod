@@ -39,6 +39,19 @@ private:
      * @param N
      * @param Q
      */
-    void findMMax(int N, double Q);
+    void initMMax(int N, double Q);
+
+    /**
+     * Computes the nMax vector after setNMax was called.
+     */
+    void initNMax();
+
+    /**
+     * Initializes the n_zmax matrix
+     * @param N
+     * @param Q
+     */
+    void initN_ZMax(int N, double Q);
+
 
 };
