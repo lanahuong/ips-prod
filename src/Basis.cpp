@@ -14,7 +14,7 @@ arma::vec Basis::zPart(arma::vec &zVec, int nz) {
 arma::vec Basis::rPart(arma::vec &rVec, int m, int n) const {
     int abs_m = floor(m);
     long double const_factor = pow(br, -1) * pow(PI, -0.5);
-    for (int i = n + 1; i <= abs_m; i++) {
+    for (int i = n + 1; i <= abs_m + n; i++) {
         const_factor *= pow(i, -0.5);
     }
 
