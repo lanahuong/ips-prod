@@ -1,6 +1,6 @@
 #include "main.h"
 
-#define DEBUG
+//#define DEBUG
 using namespace std;
 
 int main()

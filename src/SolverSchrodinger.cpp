@@ -75,7 +75,7 @@ bool SolverSchrodinger::test1DSolution(const arma::rowvec &z, arma::mat phi)
     arma::mat E = (arma::regspace(0, (double) phi.n_rows - 1) + 1. / 2.) * arma::rowvec(phitrunc.n_cols, arma::fill::ones) * H_BAR * OMEGA;
     arma::mat right = E % phitrunc;
 
-    left.print();
-    right.print();
+    //  left.print();
+    //  right.print();
     return approx_equal(left, right, "absdiff", 0.001);
 }
