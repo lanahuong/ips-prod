@@ -10,7 +10,6 @@
 #include <armadillo>
 #include <vector>
 #include <cmath>
-#include "Hermite.h"
 #include "Derivator.h"
 
 /**

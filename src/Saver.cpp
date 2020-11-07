@@ -4,7 +4,7 @@
  * @param z the z values where functions were evaluated
  * @param f the matrix containing a function on each row
  */
-void Saver::saveToCSV(arma::rowvec z, arma::mat f)
+void Saver::saveToCSV(const arma::rowvec& z, const arma::mat& f)
 {
   // Namefile
   std::string filename = "tmp/schrodinger_solutions.csv";

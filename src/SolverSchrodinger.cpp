@@ -1,6 +1,7 @@
 #include "SolverSchrodinger.h"
 #include "Derivator.h"
 #include "constants.h"
+#include "Poly.h"
 
 /**
  * @param zmin minimum z where to compute the function
@@ -41,7 +42,13 @@ arma::mat SolverSchrodinger::solve1D(const arma::rowvec &z, uint n)
 
   // Compute the final solution
   arma::mat result = nwiseconst * zwiseconst;
-  arma::mat hermitePolynomes = Hermite::computeMatrix(n, z);
+  auto *poly = new Poly();
+  poly->calcHermite(n, z.as_col());
+  arma::mat hermitePolynomes;
+  hermitePolynomes.set_size(n+1, z.n_elem );
+  for(uint i = 0 ; i<=n ; i++){
+      hermitePolynomes.row(i) = poly->hermite(i).as_row();
+  }
   result = result % hermitePolynomes;
   return result;
 }

@@ -9,7 +9,8 @@ OrthogonalityChecker::OrthogonalityChecker(uint maxIndex, uint nquadra)
 {
   this->indexMax = maxIndex;
   this->nQuadra = nquadra < HERM_QUADRA_N_MAX ? nquadra : HERM_QUADRA_N_MAX;
-  this->hermiteMatrix = Hermite::computeMatrix(this->indexMax + 1, getZvector());
+  this->poly = new Poly();
+  this->poly->calcHermite(this->indexMax + 1, getZvector());
   this->initPseudoFactorial();
 }
 
@@ -30,7 +31,7 @@ double OrthogonalityChecker::checkFor(uint n, uint m)
   else
     {
       double constFactor = this->pseudoFactorials.at(n) * this->pseudoFactorials.at(m);
-      return accu(this->getWeightVector() % this->hermiteMatrix.row(m) % this->hermiteMatrix.row(n)) * constFactor;
+      return accu(this->getWeightVector() % this->poly->hermite(m) % this->poly->hermite(n)) * constFactor;
     }
 }
 
@@ -41,9 +42,9 @@ double OrthogonalityChecker::checkFor(uint n, uint m)
  * The z are the roots of the hermite polynomial
  * @return the vector corrected because we change variables in the integral
  */
-arma::rowvec OrthogonalityChecker::getZvector()
+arma::vec OrthogonalityChecker::getZvector()
 {
-  return (this->hermiteQuadra[this->nQuadra].row(0).as_row()) / (sqrt(MASS * OMEGA / H_BAR));
+  return (this->hermiteQuadra[this->nQuadra].row(0).as_col()) / (sqrt(MASS * OMEGA / H_BAR));
 }
 
 /**
@@ -52,9 +53,9 @@ arma::rowvec OrthogonalityChecker::getZvector()
  * The degree of the quadrature is already stored on the instance.
  * @return a row of doubles
  */
-arma::Row<double> inline OrthogonalityChecker::getWeightVector()
+arma::vec inline OrthogonalityChecker::getWeightVector()
 {
-  return this->hermiteQuadra[this->nQuadra].row(1);
+  return this->hermiteQuadra[this->nQuadra].row(1).as_col();
 }
 
 /**
@@ -63,7 +64,7 @@ arma::Row<double> inline OrthogonalityChecker::getWeightVector()
  */
 void OrthogonalityChecker::initPseudoFactorial()
 {
-  this->pseudoFactorials = arma::rowvec(this->indexMax + 1, arma::fill::ones);
+  this->pseudoFactorials = arma::vec(this->indexMax + 1, arma::fill::ones);
   for (u_long i = 1; i <= this->indexMax; i++)
     {
       this->pseudoFactorials.at(i) = this->pseudoFactorials.at(i - 1) * pow(static_cast<double>(2 * i), -0.5);

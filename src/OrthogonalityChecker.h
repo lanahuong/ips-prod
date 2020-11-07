@@ -9,7 +9,7 @@
 #include <armadillo>
 #include "constants.h"
 #include "hermiteCoefs.h"
-#include "Hermite.h"
+#include "Poly.h"
 #include "SolverSchrodinger.h"
 
 /**
@@ -45,7 +45,7 @@ class OrthogonalityChecker {
    * @brief Get the weight from the values previously computed in python and included in the header
    * hermite_coefs.h
    */
-  arma::Row<double> getWeightVector();
+  arma::vec getWeightVector();
 
   /**
    * @brief Simple function to compute the pseudo factorials factor given a cache stored in pseudoFactorials
@@ -56,12 +56,12 @@ class OrthogonalityChecker {
   /**
    * @brief Holds the pre computed values
    */
-  arma::rowvec pseudoFactorials;
+  arma::vec pseudoFactorials;
 
   /**
    * @brief Holds H_n evaluated on a vector composed of the Gauss-Hermite polynomial's roots
    */
-  arma::mat hermiteMatrix;
+  Poly * poly;
 
   /**
    * @brief An array of arma::mat. In each matrix the first row corresponds o the
@@ -71,7 +71,7 @@ class OrthogonalityChecker {
   /**
    * @brief Finds and computes the vector of Z used in Hermite::ComputeMatrix
    */
-  arma::rowvec getZvector();
+  arma::vec getZvector();
 };
 
 #endif //PROJET_IPS1_ORTHOGONALITYCHECKER_H

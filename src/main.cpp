@@ -1,6 +1,6 @@
 #include "main.h"
 
-
+#define DEBUG
 using namespace std;
 
 int main()
@@ -25,7 +25,7 @@ int main()
 #ifdef DEBUG
   bool test = SolverSchrodinger::test1DSolution(z, m);
   cout << to_string(test);
-  if {!test}{
+  if (!test){
     return 1;
   }
 #endif
