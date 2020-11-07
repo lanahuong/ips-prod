@@ -1,4 +1,4 @@
-MODULES += SolverSchrodinger Derivator OrthogonalityChecker Poly Basis
+MODULES += SolverSchrodinger Derivator OrthogonalityChecker Poly Basis NuclearDensityCalculator
 MAIN = main
 ORPHANED_HEADERS = hermiteCoefs constants
 

@@ -3,11 +3,11 @@
 #include "constants.h"
 
 
-arma::mat Basis::basisFunc(int m, int n, int nz, arma::vec &rVec, arma::vec zVec) const {
+arma::mat Basis::basisFunc(int m, int n, int nz, const arma::vec &rVec, const arma::vec &zVec) const {
     return rPart(rVec, m, n).as_row() * zPart(zVec, nz).as_col();
 }
 
-arma::vec Basis::zPart(arma::vec &zVec, int nz) const {
+arma::vec Basis::zPart(const arma::vec &zVec, int nz) const {
     long double const_factor = pow(bz, -0.5) * pow(PI, -0.25);
     for (int i = 1; i <= nz; i++) const_factor *= pow(2 * i, -0.5);
     arma::vec squared_arg = arma::square(zVec / bz);
@@ -18,7 +18,7 @@ arma::vec Basis::zPart(arma::vec &zVec, int nz) const {
 
 }
 
-arma::vec Basis::rPart(arma::vec &rVec, int m, int n) const {
+arma::vec Basis::rPart(const arma::vec &rVec, int m, int n) const {
     int abs_m = floor(m);
     long double const_factor = pow(br, -1) * pow(PI, -0.5);
     for (int i = n + 1; i <= abs_m + n; i++) const_factor *= pow(i, -0.5);
@@ -56,5 +56,7 @@ arma::imat Basis::calcN_zMax(int N, double Q) {
     }
     return tmp;
 }
+
+Basis::Basis() = default;
 
 

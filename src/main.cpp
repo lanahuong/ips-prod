@@ -1,4 +1,5 @@
 #include "main.h"
+#include "NuclearDensityCalculator.h"
 
 //#define DEBUG
 using namespace std;
@@ -23,14 +24,18 @@ int main()
 #endif
   arma::rowvec z = arma::regspace(-bound, STEP, bound).as_row();
 #ifdef DEBUG
-  bool test = SolverSchrodinger::test1DSolution(z, m);
-  cout << to_string(test);
-  if (!test){
-    return 1;
-  }
+    bool test = SolverSchrodinger::test1DSolution(z, m);
+    cout << to_string(test);
+    if (!test){
+      return 1;
+    }
 #endif
-  Saver::saveToCSV(z, m);
-  cout << "file saved!" << endl;
+    Saver::saveToCSV(z, m);
+    cout << "file saved!" << endl;
 
-  return 0;
+    NuclearDensityCalculator nuclearDensityCalculator;
+    nuclearDensityCalculator.printRhoDefs();
+
+
+    return 0;
 }

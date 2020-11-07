@@ -12,9 +12,11 @@
 class Basis {
 public:
 
-    int mMax; /**< Holds the maximum quantum number m for the basis */
+    int mMax{}; /**< Holds the maximum quantum number m for the basis */
     arma::ivec nMax; /**< Holds a vector of principal quantum numbers considered for the basis */
     arma::imat n_zMax; /**< nz quantum numbers */
+
+    Basis();
 
     /**
      * Basis constructor
@@ -32,7 +34,7 @@ public:
      * @param n Principal quantum number
      * @return
      */
-    arma::vec rPart(arma::vec &rVec, int m, int n) const;
+    arma::vec rPart(const arma::vec &rVec, int m, int n) const;
 
     /**
      *
@@ -40,7 +42,7 @@ public:
      * @param nz
      * @return
      */
-    arma::vec zPart(arma::vec &zVec, int nz) const;
+    arma::vec zPart(const arma::vec &zVec, int nz) const;
 
     /**
      *
@@ -51,12 +53,12 @@ public:
      * @param zVec Vector of r[j]
      * @return a matrix where Mat(i,j) corresponds to \f$ \Psi_{m_a, n_a, n_{za}} (r_i, z_j) \f$
      */
-    arma::mat basisFunc(int m, int n, int nz, arma::vec &rVec, arma::vec zVec) const;
+    arma::mat basisFunc(int m, int n, int nz, const arma::vec &rVec, const arma::vec &zVec) const;
 
 private:
 
-    long double br; /**< Orthogonal deformation parameter */
-    long double bz; /**< Z deformation parameter */
+    long double br{}; /**< Orthogonal deformation parameter */
+    long double bz{}; /**< Z deformation parameter */
     arma::cube rPartVals; /**< */
     arma::vec lastRVals; /**< */
     arma::mat zPartVals; /**< */
