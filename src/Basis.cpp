@@ -3,8 +3,8 @@
 #include "constants.h"
 
 
-arma::mat Basis::basisFunc(int m, int n, int nz, arma::vec &rVec, arma::vec zVec) {
-    return nullptr; //TODO
+arma::mat Basis::basisFunc(int m, int n, int nz, arma::vec &rVec, arma::vec zVec) const {
+    return rPart(rVec, m, n).as_row() * zPart(zVec, nz).as_col();
 }
 
 arma::vec Basis::zPart(arma::vec &zVec, int nz) const {

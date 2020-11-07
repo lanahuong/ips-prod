@@ -1,5 +1,7 @@
 bin
-obj
-tmp
+
+
 /cmake-build-debug/
 /cmake-build-debug-coverage/
+!/obj/
+!/obj/savers/

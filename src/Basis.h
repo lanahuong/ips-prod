@@ -4,6 +4,7 @@
  */
 
 #include <armadillo>
+#include "Poly.h"
 
 /**
  * @class Basis
@@ -43,23 +44,24 @@ public:
 
     /**
      *
-     * @param m
-     * @param n
-     * @param nz
-     * @param rVec
-     * @param zVec
-     * @return
+     * @param m Quantum number
+     * @param n Quantum number
+     * @param nz Quantum number
+     * @param rVec Vector of r[i]
+     * @param zVec Vector of r[j]
+     * @return a matrix where Mat(i,j) corresponds to \f$ \Psi_{m_a, n_a, n_{za}} (r_i, z_j) \f$
      */
-    arma::mat basisFunc(int m, int n, int nz, arma::vec &rVec, arma::vec zVec);
+    arma::mat basisFunc(int m, int n, int nz, arma::vec &rVec, arma::vec zVec) const;
 
 private:
 
-    long double br; /**< */
-    long double bz; /**< */
+    long double br; /**< Orthogonal deformation parameter */
+    long double bz; /**< Z deformation parameter */
     arma::cube rPartVals; /**< */
     arma::vec lastRVals; /**< */
     arma::mat zPartVals; /**< */
     arma::vec lastZVals; /**< */
+    Poly poly;
 
     /**
      * Given the definition and nMax being >=0 , if Q is null the sup is not defined
