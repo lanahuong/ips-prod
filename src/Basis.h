@@ -25,8 +25,8 @@ public:
 
 private:
 
-    double br;
-    double bz;
+    long double br;
+    long double bz;
     arma::cube rPartVals;
     arma::vec lastRVals;
     arma::mat zPartVals;

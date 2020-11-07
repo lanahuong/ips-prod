@@ -41,8 +41,8 @@ void Poly::calcLaguerre(int mMax, int nMax, const arma::vec &z) {
      * The slice 0 is already filled with ones
      */
     for (int depth = 2; depth < nMax; depth++) {
-        coef1 = 2 + (m * row_ones - col_ones * z.as_row() - 1) / depth;
-        coef2 = 1 + (m - 1) / depth * row_ones;
+        coef1 = 2 + (m * row_ones - col_ones * z.as_row() - 1) / (double) depth;
+        coef2 = 1 + (m - 1) / (double) depth * row_ones;
         laguerrePolynomial.slice(depth) = coef1 % laguerrePolynomial.slice(depth - 1) - coef2 % laguerrePolynomial.slice(depth - 2);
     }
 }

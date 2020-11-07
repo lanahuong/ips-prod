@@ -13,7 +13,7 @@ arma::vec Basis::zPart(arma::vec &zVec, int nz) {
 
 arma::vec Basis::rPart(arma::vec &rVec, int m, int n) const {
     int abs_m = floor(m);
-    double const_factor = pow(br, -1) * pow(PI, -0.5);
+    long double const_factor = pow(br, -1) * pow(PI, -0.5);
     for (int i = n + 1; i <= abs_m; i++) {
         const_factor *= pow(i, -0.5);
     }
@@ -23,7 +23,7 @@ arma::vec Basis::rPart(arma::vec &rVec, int m, int n) const {
     Poly poly;
     poly.calcLaguerre(abs_m + 1, n + 1, squared_arg);
 
-    arma::vec exp = arma::exp(-squared_arg / 2);
+    arma::vec exp = arma::exp(-squared_arg / 2.0);
     arma::vec pow = arma::pow(rVec / br, abs_m);
     return const_factor * exp % pow % poly.laguerre(abs_m, n);
 }
