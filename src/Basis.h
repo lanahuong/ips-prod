@@ -17,7 +17,7 @@ public:
 
     Basis(double br, double bz, int N, double Q);
 
-    arma::vec rPart(arma::vec &rVec, int m, int n);
+    arma::vec rPart(arma::vec &rVec, int m, int n) const;
 
     arma::vec zPart(arma::vec &zVec, int nz);
 
@@ -39,19 +39,18 @@ private:
      * @param N
      * @param Q
      */
-    void initMMax(int N, double Q);
+    static int calcMMax(int N, double Q);
 
     /**
      * Computes the nMax vector after setNMax was called.
      */
-    void initNMax();
+    arma::ivec calcNMax() const;
 
     /**
      * Initializes the n_zmax matrix
      * @param N
      * @param Q
      */
-    void initN_ZMax(int N, double Q);
-
+    arma::imat calc(int N, double Q);
 
 };
