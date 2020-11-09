@@ -28,19 +28,19 @@ public:
     Basis(double br, double bz, int N, double Q);
 
     /**
-     *
+     * Compute the r part of the function
      * @param rVec
      * @param m Angular momentum ?
      * @param n Principal quantum number
-     * @return
+     * @return the r part of the function
      */
     arma::vec rPart(const arma::vec &rVec, int m, int n);
 
     /**
-     *
+     * Compute the z part of the function
      * @param zVec
      * @param nz
-     * @return
+     * @return the z part of the function
      */
     arma::vec zPart(const arma::vec &zVec, int nz);
 

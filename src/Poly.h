@@ -40,22 +40,22 @@ public:
 
     /**
      * @brief Get the Hermite polynomial previously computed of rank n-1
-     * @param n the rank + 1 of the polynomial
+     * @param n the rank of the polynomial to get
      */
     arma::vec hermite(int n);
 
     /**
-    * @brief Iteratively evaluate the Hermite polynomial on a vector
-    * @param nMax max degree to compute
-    * @param mMax
+    * @brief Iteratively evaluate the Laguerre polynomial on a vector
+    * @param mMax max m parameter
+    * @param nMax max n parameter
     * @param z input vector
     */
     void calcLaguerre(int mMax, int nMax, const arma::vec &z);
 
     /**
-     * @brief Get the Hermite polynomial previously computed of rank n-1
-     * @param n the rank + 1 of the polynomial
-     * @param m
+     * @brief Get the Laguerre polynomial previously computed with parameters m and n
+     * @param m the m parameter of the polynomial to get
+     * @param n the n parameter of the polynomial to get
      */
     arma::vec laguerre(int m, int n);
 };

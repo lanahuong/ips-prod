@@ -17,7 +17,9 @@ void Poly::calcHermite(uint nMax, const arma::vec &vec) {
     }
 }
 
-arma::vec Poly::hermite(int n) { return hermitePolynomial.row(n).as_col(); }
+arma::vec Poly::hermite(int n) {
+    return hermitePolynomial.row(n).as_col();
+}
 
 arma::vec Poly::laguerre(int m, int n) {
     return laguerrePolynomial.slice(n).row(m).as_col();
@@ -25,13 +27,15 @@ arma::vec Poly::laguerre(int m, int n) {
 
 void Poly::calcLaguerre(int mMax, int nMax, const arma::vec &z) {
     /**
-     * Init of the cube and helper vectors. Initializes also the first two slices (if needed) for the recursion
+     * Initialize the cube and helper vectors. Initialize also the first two slices (if needed) for the recursion
      */
     laguerrePolynomial = arma::cube(mMax, z.n_elem, nMax, arma::fill::ones);
     arma::vec m = arma::regspace(0, mMax - 1).as_col();
     arma::rowvec row_ones = arma::vec(z.n_elem, arma::fill::ones).as_row();
     arma::colvec col_ones = arma::vec(mMax, arma::fill::ones).as_col();
-    if (nMax > 1) laguerrePolynomial.slice(1) = 1 + (m * row_ones) - col_ones * z.as_row();
+    if (nMax > 1) {
+        laguerrePolynomial.slice(1) = 1 + (m * row_ones) - col_ones * z.as_row();
+    }
 
     arma::mat coef1;
     arma::mat coef2;

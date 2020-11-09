@@ -1,9 +1,9 @@
-// Mandatory test #00 - Hermite and Laguerre polynomials
 #include "../src/Poly.h"
 #include "../src/Basis.h"
 #include <gtest/gtest.h>
 
 TEST(PolyClass, Mandatory) {
+// Mandatory test #00 - Hermite and Laguerre polynomials
     Poly poly;
     arma::vec zVals, calcVals, targetVals;
     zVals = {-3.1, -2.3, -1.0, -0.3, 0.1, 4.3, 9.2, 13.7};

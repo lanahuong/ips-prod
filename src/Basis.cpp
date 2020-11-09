@@ -9,36 +9,46 @@ arma::mat Basis::basisFunc(int m, int n, int nz, const arma::vec &rVec, const ar
 
 arma::vec Basis::zPart(const arma::vec &zVec, int nz) {
     long double const_factor = pow(bz, -0.5) * pow(PI, -0.25);
-    for (int i = 1; i <= nz; i++) const_factor *= pow(2 * i, -0.5);
+    
+    for (int i = 1; i <= nz; i++) {
+        const_factor *= pow(2 * i, -0.5);
+    }
+    
     arma::vec squared_arg = arma::square(zVec / bz);
     arma::vec exp = arma::exp(-squared_arg / 2.0);
     poly.calcHermite(nz + 1, zVec / bz);
+    
     return const_factor * exp % poly.hermite(nz);
-
 }
 
 arma::vec Basis::rPart(const arma::vec &rVec, int m, int n) {
-    int abs_m = floor(m);
     long double const_factor = pow(br, -1) * pow(PI, -0.5);
-    for (int i = n + 1; i <= abs_m + n; i++) const_factor *= pow(i, -0.5);
+    
+    for (int i = n + 1; i <= m + n; i++) {
+        const_factor *= pow(i, -0.5);
+    }
+
     arma::vec squared_arg = arma::square(rVec / br);
     arma::vec exp = arma::exp(-squared_arg / 2.0);
-    arma::vec pow = arma::pow(rVec / br, abs_m);
-    poly.calcLaguerre(abs_m + 1, n + 1, squared_arg);
-    return const_factor * exp % pow % poly.laguerre(abs_m, n);
+    arma::vec pow = arma::pow(rVec / br, m);
+    poly.calcLaguerre(m + 1, n + 1, squared_arg);
+
+    return const_factor * exp % pow % poly.laguerre(m, n);
 }
 
 Basis::Basis(double br, double bz, int N, double Q) : br(br), bz(bz) {
     this->mMax = calcMMax(N, Q);
     this->nMax = calcNMax();
     this->n_zMax = calcN_zMax(N, Q);
-    //TODO
+    // TODO optimize (precalculation, save hash...)
 }
 
 
 int Basis::calcMMax(int N, double Q) {
-    if (Q != 0) return floor((N + 2) * pow(Q, -1.0 / 3.0) - 0.5 * pow(Q, -1));
-    else return 0;
+    if (Q != 0) {
+        return floor((N + 2) * pow(Q, -1.0 / 3.0) - 0.5 * pow(Q, -1));
+    }
+    return 0;
 }
 
 arma::ivec Basis::calcNMax() const {
@@ -56,5 +66,3 @@ arma::imat Basis::calcN_zMax(int N, double Q) {
 }
 
 Basis::Basis() = default;
-
-
