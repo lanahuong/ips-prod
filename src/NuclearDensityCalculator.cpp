@@ -25,11 +25,17 @@ arma::mat NuclearDensityCalculator::naive_method(const arma::vec &rVals, const a
     return result;
 }
 
-double NuclearDensityCalculator::rho(int m_a, int n_a, int n_z_a, int m_b, int n_b, int n_z_b) {
-    int a = basis.ind.at(n_z_a, n_a, m_a);
-    int b = basis.ind.at(n_z_b, n_b, m_b);
-    return imported_rho_values.at(a, b);
-}
+/** 
+  ind = arma::zeros<arma::icube>(max(n_zMax), max(nMax), mMax);
+  int i = 0;
+  for (int m = 0; m < mMax; m++)
+    for (int n = 0; n < nMax[m]; n++)
+      for (int n_z = 0; n_z < n_zMax.at(m, n); n_z++)
+      {
+        ind.at(n_z, n, m) = i;
+        i++;
+      }
+
 
 arma::mat NuclearDensityCalculator::naive_method2(const arma::vec &rVals, const arma::vec &zVals) {
     arma::mat result = arma::zeros(rVals.size(), zVals.size()); // number of points on r- and z- axes
@@ -51,7 +57,7 @@ arma::mat NuclearDensityCalculator::naive_method2(const arma::vec &rVals, const 
     }
     return result;
 }
-
+**/
 
 NuclearDensityCalculator::NuclearDensityCalculator() {
     imported_rho_values.load("src/rho.arma", arma::arma_ascii);
@@ -60,11 +66,13 @@ NuclearDensityCalculator::NuclearDensityCalculator() {
 #endif
     basis = Basis(br, bz, N, Q);
 }
-
+/** 
 double NuclearDensityCalculator::rho(int m, int n, int n_z, int mp, int np, int n_zp) {
-    return 0;
-    //TODO with the imported values;
+    int a = ind.at(n_zp, np, mp);
+    int b = ind.at(n_z, n, m);
+    return calcRho.at(a, b);
 }
+**/
 
 void NuclearDensityCalculator::printRhoDefs() {
     uint i = 0;

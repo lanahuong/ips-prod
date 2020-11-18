@@ -24,7 +24,11 @@ public:
      */
     void printRhoDefs();
 
+    arma::icube ind;
+
     arma::mat naive_method(const arma::vec &rVals, const arma::vec &zVals);
+    arma::mat naive_method2(const arma::vec &rVals, const arma::vec &zVals);
+
 };
 
 #endif //PROJET_IPS1_NUCLEARDENSITYCALCULATOR_H
