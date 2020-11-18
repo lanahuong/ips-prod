@@ -37,9 +37,9 @@ int main()
     NuclearDensityCalculator nuclearDensityCalculator;
   //  nuclearDensityCalculator.printRhoDefs();
     arma::mat res = nuclearDensityCalculator.naive_method(arma::regspace(-20,2, 20), arma::regspace(-20,2, 20));
-    arma::cube cube(21, 21, 1);
+    arma::cube cube(21, 21, 2);
     cube.slice(0) = res;
-   // cube.slice(1)= res;
+    cube.slice(1)= res;
    // cube.slice(2) = res;
   //  cube.slice(3)=res;
     std::cout << cubeToDf3(cube);
