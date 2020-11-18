@@ -1,5 +1,6 @@
 #include "main.h"
 #include "NuclearDensityCalculator.h"
+#include "savers/3Dsavers.h"
 
 //#define DEBUG
 using namespace std;
@@ -31,11 +32,18 @@ int main()
     }
 #endif
     Saver::saveToCSV(z, m);
-    cout << "file saved!" << endl;
+  //  cout << "file saved!" << endl;
 
     NuclearDensityCalculator nuclearDensityCalculator;
-    nuclearDensityCalculator.printRhoDefs();
-    arma::mat res = nuclearDensityCalculator.naive_method(arma::regspace(-10, 10), arma::regspace(-10, 10));
-    res.print();
+  //  nuclearDensityCalculator.printRhoDefs();
+    arma::mat res = nuclearDensityCalculator.naive_method(arma::regspace(-20,2, 20), arma::regspace(-20,2, 20));
+    arma::cube cube(21, 21, 1);
+    cube.slice(0) = res;
+   // cube.slice(1)= res;
+   // cube.slice(2) = res;
+  //  cube.slice(3)=res;
+    std::cout << cubeToDf3(cube);
+
+   // res.print();
     return 0;
 }
