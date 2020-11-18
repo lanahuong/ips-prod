@@ -4,7 +4,7 @@
 
 
 arma::mat Basis::basisFunc(int m, int n, int nz, const arma::vec &rVec, const arma::vec &zVec) {
-    return zPart(zVec, nz).as_col() * rPart(rVec, m, n).as_row();
+    return rPart(rVec, m, n).as_col() * zPart(zVec, nz).as_row();
 }
 
 arma::vec Basis::zPart(const arma::vec &zVec, int nz) {

@@ -12,7 +12,7 @@ arma::mat NuclearDensityCalculator::naive_method(const arma::vec &rVals, const a
                             arma::mat funcA = basis.basisFunc(m, n, n_z, rVals, zVals);
                             arma::mat funcB = basis.basisFunc(mp, np, n_zp, rVals, zVals);
                             if(mp == m)
-                                result += funcA % funcB * imported_rho_values.at(j, i); // Makes sense ?
+                                result += funcA % funcB * imported_rho_values.at(i, j); // Makes sense ?
                             j++;//to compute the pos in the rho matrix
                         }
                     }
