@@ -36,10 +36,20 @@ int main()
 
     NuclearDensityCalculator nuclearDensityCalculator;
   //  nuclearDensityCalculator.printRhoDefs();
-    arma::mat res = nuclearDensityCalculator.naive_method(arma::regspace(-20,2, 20), arma::regspace(-20,2, 20));
-    arma::cube cube(21, 21, 2);
-    cube.slice(0) = res;
-    cube.slice(1)= res;
+    arma::mat res = nuclearDensityCalculator.naive_method(arma::regspace(-10,1, 10), arma::regspace(-20,1, 20));
+    arma::cube cube = arma::zeros(41,41,41);
+    int r = -20;
+    for (int k = 0 ; k < 41 ; k++) {
+      for (int t = 0 ; t<40  ; t++) {
+        double theta = PI*t/20;
+        int x = (r*cos(theta) + 20);
+        int y = (r*sin(theta) + 20);
+        cube.tube(x,y) = res.row(k);
+      }
+      r ++;
+    }
+    //cube.slice(0) = res;
+    //cube.slice(1)= res;
    // cube.slice(2) = res;
   //  cube.slice(3)=res;
     std::cout << cubeToDf3(cube);
