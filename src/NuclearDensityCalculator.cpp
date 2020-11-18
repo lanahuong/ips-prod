@@ -9,10 +9,10 @@ arma::mat NuclearDensityCalculator::naive_method(const arma::vec &rVals, const a
                 for (int mp = 0; mp < basis.mMax; mp++) {
                     for (int np = 0; np < basis.nMax(mp); np++) {
                         for (int n_zp = 0; n_zp < basis.n_zMax(mp, np); n_zp++) {
-                            arma::mat funcA = basis.basisFunc(m, n, n_z, zVals, rVals);
-                            arma::mat funcB = basis.basisFunc(mp, np, n_zp, zVals, rVals);
-                            //   result += funcA % funcB * rho(m, n, n_z, mp, np, n_zp); // mat += mat % mat * double
-                            result += funcA % funcB * imported_rho_values.at(i, j); // Makes sense ?
+                            arma::mat funcA = basis.basisFunc(m, n, n_z, rVals, zVals);
+                            arma::mat funcB = basis.basisFunc(mp, np, n_zp, rVals, zVals);
+                            if(mp == m)
+                                result += funcA % funcB * imported_rho_values.at(j, i); // Makes sense ?
                             j++;//to compute the pos in the rho matrix
                         }
                     }
