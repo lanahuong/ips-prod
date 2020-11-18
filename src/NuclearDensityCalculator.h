@@ -10,7 +10,7 @@ private:
     int N = 14;
     double Q = 1.3;
     double br = 1.935801664793151;
-    double bz = 1.829683956491218;
+    double bz = 2.829683956491218;
     arma::mat imported_rho_values;
     Basis basis;
 
