@@ -56,14 +56,12 @@ NuclearDensityCalculator::NuclearDensityCalculator() {
 #endif
     basis = Basis(br, bz, N, Q);
 
-//   ind = arma::Cube<arma::sword>(arma::max(basis.n_zMax), arma::max(basis.nMax), basis.mMax);
-      int i = 0;
+    ind = arma::Cube<arma::sword>(basis.n_zMax.max(), basis.nMax.max(), basis.mMax);
+    int i = 0;
     for (int m = 0; m < basis.mMax; m++)
         for (int n = 0; n < basis.nMax[m]; n++)
             for (int n_z = 0; n_z < basis.n_zMax.at(m, n); n_z++)
                 ind.at(n_z, n, m) = i++;
-
-
 }
 
 
