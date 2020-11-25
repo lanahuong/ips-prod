@@ -57,6 +57,21 @@ public:
      */
     arma::mat basisFunc(int m, int n, int nz, const arma::vec &rVec, const arma::vec &zVec);
 
+    /**
+     * Uses memoisation to faster compute the values.
+     *
+     * @warning The mem depends on the rVec and zVec, if they change the result
+     * will be false. To "prevent" it we check the memptr of the arma vecs,
+     * but it's only a VERY WEAK PROTECTION. Computing a hash is too slow,
+     * the only way would be to keep the vects IN the Basis class. (TODO ?)
+     *
+     * @param m Quantum number
+     * @param n Quantum number
+     * @param nz Quantum number
+     * @param rVec Vector of r[i]
+     * @param zVec Vector of r[j]
+     * @return a matrix where Mat(i,j) corresponds to \f$ \Psi_{m_a, n_a, n_{za}} (r_i, z_j) \f$
+     */
     arma::mat basisFunc_mem(int m, int n, int nz, const arma::vec &rVec, const arma::vec &zVec);
 
 private:
