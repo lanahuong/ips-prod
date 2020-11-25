@@ -11,7 +11,7 @@ arma::mat NuclearDensityCalculator::naive_method(const arma::vec &rVals, const a
                         for (int n_zp = 0; n_zp < basis.n_zMax(mp, np); n_zp++) {
                             arma::mat funcA = basis.basisFunc(m, n, n_z, rVals, zVals);
                             arma::mat funcB = basis.basisFunc(mp, np, n_zp, rVals, zVals);
-                            if(mp == m)
+                            if (mp == m)
                                 result += funcA % funcB * imported_rho_values.at(i, j); // Makes sense ?
                             j++;//to compute the pos in the rho matrix
                         }
@@ -24,17 +24,6 @@ arma::mat NuclearDensityCalculator::naive_method(const arma::vec &rVals, const a
     }
     return result;
 }
-
-/** 
-  ind = arma::zeros<arma::icube>(max(n_zMax), max(nMax), mMax);
-  int i = 0;
-  for (int m = 0; m < mMax; m++)
-    for (int n = 0; n < nMax[m]; n++)
-      for (int n_z = 0; n_z < n_zMax.at(m, n); n_z++)
-      {
-        ind.at(n_z, n, m) = i;
-        i++;
-      }
 
 
 arma::mat NuclearDensityCalculator::naive_method2(const arma::vec &rVals, const arma::vec &zVals) {
@@ -57,22 +46,33 @@ arma::mat NuclearDensityCalculator::naive_method2(const arma::vec &rVals, const 
     }
     return result;
 }
-**/
+
 
 NuclearDensityCalculator::NuclearDensityCalculator() {
     imported_rho_values.load("src/rho.arma", arma::arma_ascii);
+
 #ifdef DEBUG
     std::cout << "[src/rho.arma defs imported]" << std::endl;
 #endif
     basis = Basis(br, bz, N, Q);
+
+//   ind = arma::Cube<arma::sword>(arma::max(basis.n_zMax), arma::max(basis.nMax), basis.mMax);
+      int i = 0;
+    for (int m = 0; m < basis.mMax; m++)
+        for (int n = 0; n < basis.nMax[m]; n++)
+            for (int n_z = 0; n_z < basis.n_zMax.at(m, n); n_z++)
+                ind.at(n_z, n, m) = i++;
+
+
 }
-/** 
+
+
 double NuclearDensityCalculator::rho(int m, int n, int n_z, int mp, int np, int n_zp) {
-    int a = ind.at(n_zp, np, mp);
-    int b = ind.at(n_z, n, m);
-    return calcRho.at(a, b);
+    int a = this->ind.at(n_zp, np, mp);
+    int b = this->ind.at(n_z, n, m);
+    return imported_rho_values.at(a, b);
 }
-**/
+
 
 void NuclearDensityCalculator::printRhoDefs() {
     uint i = 0;

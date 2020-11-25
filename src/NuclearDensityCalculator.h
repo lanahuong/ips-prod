@@ -14,7 +14,7 @@ private:
     arma::mat imported_rho_values;
     Basis basis;
 
-    static double rho(int m, int n, int n_z, int mp, int np, int n_zp);
+    double rho(int m, int n, int n_z, int mp, int np, int n_zp);
 
 public:
     NuclearDensityCalculator();
