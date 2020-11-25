@@ -35,6 +35,7 @@ public:
      * @return the r part of the function
      */
     arma::vec rPart(const arma::vec &rVec, int m, int n);
+    arma::vec rPart_mem(const arma::vec &rVec, int m, int n);
 
     /**
      * Compute the z part of the function
@@ -43,6 +44,7 @@ public:
      * @return the z part of the function
      */
     arma::vec zPart(const arma::vec &zVec, int nz);
+    arma::vec zPart_mem(const arma::vec &zVec, int nz);
 
     /**
      *
@@ -55,14 +57,12 @@ public:
      */
     arma::mat basisFunc(int m, int n, int nz, const arma::vec &rVec, const arma::vec &zVec);
 
+    arma::mat basisFunc_mem(int m, int n, int nz, const arma::vec &rVec, const arma::vec &zVec);
+
 private:
 
     long double br{}; /**< Orthogonal deformation parameter */
     long double bz{}; /**< Z deformation parameter */
-    arma::cube rPartVals; /**< */
-    arma::vec lastRVals; /**< */
-    arma::mat zPartVals; /**< */
-    arma::vec lastZVals; /**< */
     Poly poly;
 
     /**
@@ -85,5 +85,12 @@ private:
      * @param Q
      */
     arma::imat calcN_zMax(int N, double Q);
+
+
+    arma::ivec computed_z_indices;
+    std::vector<arma::vec> computed_z_vals;
+
+    arma::imat computed_r_indices;
+    std::vector<arma::vec> computed_r_vals;
 
 };

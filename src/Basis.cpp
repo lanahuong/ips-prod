@@ -7,23 +7,28 @@ arma::mat Basis::basisFunc(int m, int n, int nz, const arma::vec &rVec, const ar
     return rPart(rVec, m, n).as_col() * zPart(zVec, nz).as_row();
 }
 
+arma::mat Basis::basisFunc_mem(int m, int n, int nz, const arma::vec &rVec, const arma::vec &zVec) {
+    return rPart_mem(rVec, m, n).as_col() * zPart_mem(zVec, nz).as_row();
+}
+
+
 arma::vec Basis::zPart(const arma::vec &zVec, int nz) {
     long double const_factor = pow(bz, -0.5) * pow(PI, -0.25);
-    
+
     for (int i = 1; i <= nz; i++) {
         const_factor *= pow(2 * i, -0.5);
     }
-    
+
     arma::vec squared_arg = arma::square(zVec / bz);
     arma::vec exp = arma::exp(-squared_arg / 2.0);
     poly.calcHermite(nz + 1, zVec / bz);
-    
+
     return const_factor * exp % poly.hermite(nz);
 }
 
 arma::vec Basis::rPart(const arma::vec &rVec, int m, int n) {
     long double const_factor = pow(br, -1) * pow(PI, -0.5);
-    
+
     for (int i = n + 1; i <= m + n; i++) {
         const_factor *= pow(i, -0.5);
     }
@@ -40,7 +45,12 @@ Basis::Basis(double br, double bz, int N, double Q) : br(br), bz(bz) {
     this->mMax = calcMMax(N, Q);
     this->nMax = calcNMax();
     this->n_zMax = calcN_zMax(N, Q);
-    // TODO optimize (precalculation, save hash...)
+
+    computed_z_indices = arma::ivec(n_zMax.max(), arma::fill::zeros);
+    computed_z_vals = std::vector<arma::vec>(n_zMax.max());
+
+    computed_r_indices = arma::imat(mMax + 1, nMax.max() + 1, arma::fill::zeros);
+    computed_r_vals = std::vector<arma::vec>((mMax + 1) * (nMax.max() + 1));
 }
 
 
@@ -64,5 +74,28 @@ arma::imat Basis::calcN_zMax(int N, double Q) {
     }
     return tmp;
 }
+
+arma::vec Basis::zPart_mem(const arma::vec &zVec, int nz) {
+    if (computed_z_indices.at(nz) == (long int) zVec.memptr()) {
+        return computed_z_vals.at(nz);
+    } else {
+        arma::vec tmp = zPart(zVec, nz);
+        computed_z_indices.at(nz) = (long int) zVec.memptr();
+        computed_z_vals.at(nz) = tmp;
+        return tmp;
+    }
+}
+
+arma::vec Basis::rPart_mem(const arma::vec &rVec, int m, int n) {
+    if (computed_r_indices.at(m, n) == (long int) rVec.memptr()) {
+        return computed_r_vals.at(n * (mMax + 1) + m);
+    } else {
+        arma::vec tmp = rPart(rVec, m, n);
+        computed_r_indices.at(m, n) = (long int) rVec.memptr();
+        computed_r_vals.at(n * (mMax + 1) + m) = tmp;
+        return tmp;
+    }
+}
+
 
 Basis::Basis() = default;
