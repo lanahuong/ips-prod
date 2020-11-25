@@ -13,12 +13,13 @@ int main() {
     int z_step = 2;
     int z_len = 2 * z_bound / z_step + 1;
 
-
+    /* Chrono start*/
     auto start = std::chrono::high_resolution_clock::now();
     arma::mat res = nuclearDensityCalculator.naive_method(arma::regspace(-r_bound, r_step, r_bound), arma::regspace(-z_bound, z_step, z_bound));
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
     std::cerr << "time " << duration.count() / 1000000.0 << "s" << std::endl;
+    /* Chrono end */
 
 
     arma::cube cube = arma::zeros(r_len, r_len, z_len);
@@ -32,12 +33,7 @@ int main() {
         }
         r++;
     }
-    //cube.slice(0) = res;
-    //cube.slice(1)= res;
-    // cube.slice(2) = res;
-    //  cube.slice(3)=res;
-  //  std::cout << cubeToDf3(cube);
 
-    // res.print();
+    std::cout << cubeToDf3(cube);
     return 0;
 }
