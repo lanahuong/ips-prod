@@ -1,1 +1,1 @@
-TEST_MODULES += testsSolverSchrodinger testsOrthogonalityChecker testsDerivator testsMandatory
+TEST_MODULES += testsSolverSchrodinger testsOrthogonalityChecker testsDerivator testsMandatory testsNuclearDensityCalculator

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 project(projet_ips1)
 set(CMAKE_CXX_STANDARD 11)
-set(COMPILE_OPTIONS PRIVATE -Wall -Wextra) #)-Werror -pedantic -ansi -Wshadow -Wdouble-promotion -Wundef -fno-common -Wconversion -Wunused-parameter)
+set(COMPILE_OPTIONS PRIVATE -Wall -Wextra -march=native -mtune=native) #)-Werror -pedantic -ansi -Wshadow -Wdouble-promotion -Wundef -fno-common -Wconversion -Wunused-parameter)
 
 #Armadillo
 find_package(Armadillo REQUIRED)
@@ -23,7 +23,12 @@ target_link_libraries(main ${ARMADILLO_LIBRARIES})
 target_compile_options(main ${COMPILE_OPTIONS})
 
 #TESTS
-add_executable(tests src/Poly.cpp src/Basis.cpp src/Poly.h src/SolverSchrodinger.cpp src/SolverSchrodinger.h src/Derivator.cpp src/Derivator.h src/Basis.h src/OrthogonalityChecker.cpp src/OrthogonalityChecker.h src/savers/Saver.cpp src/savers/Saver.h src/constants.h tests/testsSolverSchrodinger.cpp tests/testsOrthogonalityChecker.cpp tests/testsDerivator.cpp tests/testsMandatory.cpp)
+add_executable(tests src/Poly.cpp src/Basis.cpp src/Poly.h src/SolverSchrodinger.cpp
+        src/SolverSchrodinger.h src/Derivator.cpp src/Derivator.h src/Basis.h src/OrthogonalityChecker.cpp src/OrthogonalityChecker.h
+        src/savers/Saver.cpp src/savers/Saver.h src/constants.h
+        src/NuclearDensityCalculator.cpp src/NuclearDensityCalculator.h
+        tests/testsSolverSchrodinger.cpp tests/testsOrthogonalityChecker.cpp tests/testsDerivator.cpp tests/testsMandatory.cpp
+        tests/testsNuclearDensityCalculator.cpp)
 target_link_libraries(tests ${ARMADILLO_LIBRARIES})
 target_compile_options(tests ${COMPILE_OPTIONS})
 target_link_libraries(tests gtest_main)
