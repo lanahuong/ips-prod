@@ -1,5 +1,6 @@
 #include "NuclearDensityCalculator.h"
 #include "Chrono.h"
+#include <list>
 
 arma::mat NuclearDensityCalculator::naive_method(const arma::vec &rVals, const arma::vec &zVals) {
     Chrono local("naive_method");
@@ -42,24 +43,29 @@ arma::mat NuclearDensityCalculator::optimized_method1(const arma::vec &rVals, co
     return result;
 }
 
+
 arma::mat NuclearDensityCalculator::optimized_method2(const arma::vec &rVals, const arma::vec &zVals) {
     Chrono local("optimized_method2");
     arma::mat result = arma::zeros(rVals.size(), zVals.size()); // number of points on r- and z- axes
+    struct opt2_pair {
+        int n, nz;
+    };
 
-//#pragma omp parallel default(shared) private(basis)
     for (int m_a = 0; m_a < basis.mMax; m_a++) {
+        std::list<opt2_pair> list;
         for (int n_a = 0; n_a < basis.nMax(m_a); n_a++) {
             for (int n_z_a = 0; n_z_a < basis.n_zMax(m_a, n_a); n_z_a++) {
-                arma::mat tmp = arma::zeros(rVals.size(), zVals.size());
-                for (int n_b = 0; n_b < basis.nMax(m_a); n_b++) {
-                    for (int n_z_b = 0; n_z_b < basis.n_zMax(m_a, n_b); n_z_b++) {
-                        arma::mat funcB = basis.basisFunc_mem(m_a, n_b, n_z_b, rVals, zVals);
-                        tmp += funcB * rho(m_a, n_a, n_z_a, m_a, n_b, n_z_b);
-                    }
-                }
-                result += basis.basisFunc_mem(m_a, n_a, n_z_a, rVals, zVals) % tmp;
+                list.push_back({n_a, n_z_a});
             }
         }
+        for (auto a : list) {
+            arma::mat tmp = arma::zeros(rVals.size(), zVals.size());
+            for (auto b : list) {
+                tmp += basis.basisFunc_mem(m_a, b.n, b.nz, rVals, zVals) * rho(m_a, a.n, a.nz, m_a, b.n, b.nz);
+            }
+            result += basis.basisFunc_mem(m_a, a.n, a.nz, rVals, zVals) % tmp;
+        }
+
     }
     return result;
 }
