@@ -31,6 +31,6 @@ int main() {
         r++;
     }
 
-    //   std::cout << cubeToDf3(cube);
+    std::cout << cubeToDf3(cube);
     return 0;
 }
