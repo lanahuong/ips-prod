@@ -18,7 +18,7 @@ add_executable(main
         src/OrthogonalityChecker.cpp src/OrthogonalityChecker.h
         src/savers/Saver.cpp src/savers/Saver.h
         src/constants.h
-        src/Basis.cpp src/savers/3Dsavers.cpp src/savers/3Dsavers.h src/NuclearDensityCalculator.cpp src/NuclearDensityCalculator.h)
+        src/Basis.cpp src/savers/3Dsavers.cpp src/savers/3Dsavers.h src/NuclearDensityCalculator.cpp src/NuclearDensityCalculator.h src/Chrono.cpp src/Chrono.h)
 target_link_libraries(main ${ARMADILLO_LIBRARIES})
 target_compile_options(main ${COMPILE_OPTIONS})
 
@@ -28,7 +28,7 @@ add_executable(tests src/Poly.cpp src/Basis.cpp src/Poly.h src/SolverSchrodinger
         src/savers/Saver.cpp src/savers/Saver.h src/constants.h
         src/NuclearDensityCalculator.cpp src/NuclearDensityCalculator.h
         tests/testsSolverSchrodinger.cpp tests/testsOrthogonalityChecker.cpp tests/testsDerivator.cpp tests/testsMandatory.cpp
-        tests/testsNuclearDensityCalculator.cpp)
+        tests/testsNuclearDensityCalculator.cpp src/Chrono.cpp src/Chrono.h)
 target_link_libraries(tests ${ARMADILLO_LIBRARIES})
 target_compile_options(tests ${COMPILE_OPTIONS})
 target_link_libraries(tests gtest_main)

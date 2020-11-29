@@ -1,6 +1,8 @@
 #include "NuclearDensityCalculator.h"
+#include "Chrono.h"
 
 arma::mat NuclearDensityCalculator::naive_method(const arma::vec &rVals, const arma::vec &zVals) {
+    Chrono local("naive_method");
     arma::mat result = arma::zeros(rVals.size(), zVals.size()); // number of points on r- and z- axes
     for (int m = 0; m < basis.mMax; m++) {
         for (int n = 0; n < basis.nMax(m); n++) {
@@ -22,13 +24,33 @@ arma::mat NuclearDensityCalculator::naive_method(const arma::vec &rVals, const a
 
 /* Since results only increases when ma = mb */
 arma::mat NuclearDensityCalculator::optimized_method1(const arma::vec &rVals, const arma::vec &zVals) {
+    Chrono local("optimized_method1");
     arma::mat result = arma::zeros(rVals.size(), zVals.size()); // number of points on r- and z- axes
     for (int m_a = 0; m_a < basis.mMax; m_a++) {
         for (int n_a = 0; n_a < basis.nMax(m_a); n_a++) {
             for (int n_z_a = 0; n_z_a < basis.n_zMax(m_a, n_a); n_z_a++) {
                 for (int n_b = 0; n_b < basis.nMax(m_a); n_b++) {
                     for (int n_z_b = 0; n_z_b < basis.n_zMax(m_a, n_b); n_z_b++) {
-                        arma::mat funcA = basis.basisFunc_mem(m_a, n_a, n_z_a, rVals, zVals);
+                        arma::mat funcA = basis.basisFunc(m_a, n_a, n_z_a, rVals, zVals);
+                        arma::mat funcB = basis.basisFunc(m_a, n_b, n_z_b, rVals, zVals);
+                        result += funcA % funcB * rho(m_a, n_a, n_z_a, m_a, n_b, n_z_b);
+                    }
+                }
+            }
+        }
+    }
+    return result;
+}
+
+arma::mat NuclearDensityCalculator::optimized_method2(const arma::vec &rVals, const arma::vec &zVals) {
+    Chrono local("optimized_method2");
+    arma::mat result = arma::zeros(rVals.size(), zVals.size()); // number of points on r- and z- axes
+    for (int m_a = 0; m_a < basis.mMax; m_a++) {
+        for (int n_a = 0; n_a < basis.nMax(m_a); n_a++) {
+            for (int n_z_a = 0; n_z_a < basis.n_zMax(m_a, n_a); n_z_a++) {
+                arma::mat funcA = basis.basisFunc_mem(m_a, n_a, n_z_a, rVals, zVals);
+                for (int n_b = 0; n_b < basis.nMax(m_a); n_b++) {
+                    for (int n_z_b = 0; n_z_b < basis.n_zMax(m_a, n_b); n_z_b++) {
                         arma::mat funcB = basis.basisFunc_mem(m_a, n_b, n_z_b, rVals, zVals);
                         result += funcA % funcB * rho(m_a, n_a, n_z_a, m_a, n_b, n_z_b);
                     }
