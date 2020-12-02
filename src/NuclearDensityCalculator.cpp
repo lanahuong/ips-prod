@@ -1,6 +1,9 @@
 #include "NuclearDensityCalculator.h"
 #include "Chrono.h"
+#include "CallbackResultBuilder.hpp"
 #include <list>
+#include <omp.h>
+#include <memory>
 
 arma::mat NuclearDensityCalculator::naive_method(const arma::vec &rVals, const arma::vec &zVals) {
     Chrono local("naive_method");
@@ -46,28 +49,30 @@ arma::mat NuclearDensityCalculator::optimized_method1(const arma::vec &rVals, co
 
 arma::mat NuclearDensityCalculator::optimized_method2(const arma::vec &rVals, const arma::vec &zVals) {
     Chrono local("optimized_method2");
-    arma::mat result = arma::zeros(rVals.size(), zVals.size()); // number of points on r- and z- axes
     struct opt2_pair {
         int n, nz;
     };
-
-    for (int m_a = 0; m_a < basis.mMax; m_a++) {
+    auto builder = std::make_shared<CallbackResultBuilder<arma::mat>>(arma::zeros(rVals.size(), zVals.size()), operation_type::Add);
+    int mMax = basis.mMax;
+    omp_set_num_threads(8);
+#pragma omp parallel for default(none) shared(builder, mMax, zVals, rVals)
+    for (int m_a = 0; m_a < mMax; m_a++) {
+        auto basisptr = std::make_shared<Basis>(br, bz, N, Q);
         std::list<opt2_pair> list;
-        for (int n_a = 0; n_a < basis.nMax(m_a); n_a++) {
-            for (int n_z_a = 0; n_z_a < basis.n_zMax(m_a, n_a); n_z_a++) {
+        for (int n_a = 0; n_a < basisptr->nMax(m_a); n_a++) {
+            for (int n_z_a = 0; n_z_a < basisptr->n_zMax(m_a, n_a); n_z_a++) {
                 list.push_back({n_a, n_z_a});
             }
         }
         for (auto a : list) {
             arma::mat tmp = arma::zeros(rVals.size(), zVals.size());
             for (auto b : list) {
-                tmp += basis.basisFunc_mem(m_a, b.n, b.nz, rVals, zVals) * rho(m_a, a.n, a.nz, m_a, b.n, b.nz);
+                tmp += basisptr->basisFunc_mem(m_a, b.n, b.nz, rVals, zVals) * rho(m_a, a.n, a.nz, m_a, b.n, b.nz);
             }
-            result += basis.basisFunc_mem(m_a, a.n, a.nz, rVals, zVals) % tmp;
+            builder->push(basisptr->basisFunc_mem(m_a, a.n, a.nz, rVals, zVals) % tmp);
         }
-
     }
-    return result;
+    return builder->GetResult();
 }
 
 
