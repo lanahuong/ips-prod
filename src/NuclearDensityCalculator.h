@@ -2,6 +2,7 @@
 #define PROJET_IPS1_NUCLEARDENSITYCALCULATOR_H
 
 #include "Basis.h"
+#include "constants.h"
 
 
 class NuclearDensityCalculator {
@@ -28,7 +29,7 @@ public:
 
     arma::mat naive_method(const arma::vec &rVals, const arma::vec &zVals);
     arma::mat naive_method2(const arma::vec &rVals, const arma::vec &zVals);
-
+    arma::cube density_cartesian(const int xyPoints, const int zPoints, const arma::vec rVals, const arma::mat res);
 };
 
 #endif //PROJET_IPS1_NUCLEARDENSITYCALCULATOR_H
