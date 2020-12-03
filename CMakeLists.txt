@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(COMPILE_OPTIONS PRIVATE) #)-Werror -pedantic -ansi -Wshadow -Wdouble-promotion -Wundef -fno-common -Wconversion -Wunused-parameter)
 
 
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -march=native -mtune=native -fopenmp -Ofast")
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -march=native -mtune=native -fopenmp -Ofast -flto")
 
 #Armadillo
 find_package(Armadillo REQUIRED)

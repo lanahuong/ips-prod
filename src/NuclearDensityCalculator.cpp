@@ -52,20 +52,21 @@ arma::mat NuclearDensityCalculator::optimized_method2(const arma::vec& rVals, co
 {
     Chrono local("optimized_method2");
     struct opt2_pair {
-      int n, nz;
+        int n, nz;
     };
+    int m_a = 0;
     auto builder = std::make_shared<CallbackResultBuilder<arma::mat>>(arma::zeros(rVals.size(), zVals.size()), operation_type::Add);
-#pragma omp parallel for default(none) shared(builder, zVals, rVals)
-    for (int m_a = 0; m_a<basis.mMax; m_a++) {
+#pragma omp parallel for default(none) private(m_a) shared(builder, zVals, rVals)
+    for (m_a = 0; m_a < basis.mMax; m_a++) {
         std::list<opt2_pair> list;
-        for (int n_a = 0; n_a<basis.nMax(m_a); n_a++) {
-            for (int n_z_a = 0; n_z_a<basis.n_zMax(m_a, n_a); n_z_a++) {
+        for (int n_a = 0; n_a < basis.nMax(m_a); n_a++) {
+            for (int n_z_a = 0; n_z_a < basis.n_zMax(m_a, n_a); n_z_a++) {
                 list.push_back({n_a, n_z_a});
             }
         }
         std::list<opt2_pair>::iterator a;
-#pragma omp parallel default(none) private(a) shared(list, m_a, rVals, zVals, builder)
-        for (a = list.begin(); a!=list.end(); a++) {
+#pragma omp parallel default(none) private(a) shared(list, m_a, rVals, zVals, builder) //num_threads(5)
+        for (a = list.begin(); a != list.end(); a++) {
             arma::mat tmp = arma::zeros(rVals.size(), zVals.size());
             auto basisptr = std::make_shared<Basis>(br, bz, N, Q);
 #pragma omp single nowait
