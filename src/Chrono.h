@@ -1,6 +1,7 @@
 #ifndef PROJET_IPS1_CHRONO_H
 #define PROJET_IPS1_CHRONO_H
 
+#include <string>
 
 class Chrono {
 public:

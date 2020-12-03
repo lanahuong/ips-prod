@@ -54,10 +54,8 @@ arma::mat NuclearDensityCalculator::optimized_method2(const arma::vec &rVals, co
     };
     auto builder = std::make_shared<CallbackResultBuilder<arma::mat>>(arma::zeros(rVals.size(), zVals.size()), operation_type::Add);
     int mMax = basis.mMax;
-    omp_set_num_threads(mMax);
 #pragma omp parallel for default(none) shared(builder, mMax, zVals, rVals)
     for (int m_a = 0; m_a < mMax; m_a++) {
-        //  std::printf(" Thread %d: %d\n", omp_get_thread_num(), m_a);
         auto basisptr = std::make_shared<Basis>(br, bz, N, Q);
         std::list<opt2_pair> list;
         for (int n_a = 0; n_a < basisptr->nMax(m_a); n_a++) {
@@ -67,7 +65,9 @@ arma::mat NuclearDensityCalculator::optimized_method2(const arma::vec &rVals, co
         }
         for (auto a : list) {
             arma::mat tmp = arma::zeros(rVals.size(), zVals.size());
+#pragma omp parallel default(none) private(a, list) shared(basisptr, m_a, rVals, zVals, tmp)
             for (auto b : list) {
+#pragma omp single nowait
                 tmp += basisptr->basisFunc_mem(m_a, b.n, b.nz, rVals, zVals) * rho(m_a, a.n, a.nz, m_a, b.n, b.nz);
             }
             builder->push(basisptr->basisFunc_mem(m_a, a.n, a.nz, rVals, zVals) % tmp);

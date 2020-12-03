@@ -21,7 +21,9 @@ add_executable(main
         src/OrthogonalityChecker.cpp src/OrthogonalityChecker.h
         src/savers/Saver.cpp src/savers/Saver.h
         src/constants.h
-        src/Basis.cpp src/savers/3Dsavers.cpp src/savers/3Dsavers.h src/NuclearDensityCalculator.cpp src/NuclearDensityCalculator.h src/Chrono.cpp src/Chrono.h src/CallbackResultBuilder.hpp)
+        src/Basis.cpp src/savers/3Dsavers.cpp src/savers/3Dsavers.h
+        src/NuclearDensityCalculator.cpp src/NuclearDensityCalculator.h
+        src/Chrono.cpp src/Chrono.h src/CallbackResultBuilder.hpp)
 target_link_libraries(main ${ARMADILLO_LIBRARIES})
 target_compile_options(main ${COMPILE_OPTIONS})
 
