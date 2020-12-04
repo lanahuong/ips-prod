@@ -4,7 +4,7 @@ void Poly::calcHermite(uint nMax, const arma::vec &vec) {
     /**
      * If the parameters are nonsense the matrix (0) is returned
      */
-    uint rowLen = vec.size();
+    arma::uword rowLen = vec.size();
     hermitePolynomial = arma::mat(nMax + 1, rowLen, arma::fill::zeros);
     hermitePolynomial.row(0) = arma::vec(rowLen, arma::fill::ones).t();
     if (nMax > 0) {
@@ -12,7 +12,7 @@ void Poly::calcHermite(uint nMax, const arma::vec &vec) {
         for (uint i = 2; i <= nMax; i++) {
             hermitePolynomial.row(i) =
                     hermitePolynomial.row(1) % hermitePolynomial.row(i - 1) -
-                    2. * ((double) i - 1.) * hermitePolynomial.row(i - 2);
+                    2. * (static_cast<double>(i) - 1.) * hermitePolynomial.row(i - 2);
         }
     }
 }
@@ -45,8 +45,8 @@ void Poly::calcLaguerre(int mMax, int nMax, const arma::vec &z) {
      * The slice 0 is already filled with ones
      */
     for (int depth = 2; depth < nMax; depth++) {
-        coef1 = 2 + (m * row_ones - col_ones * z.as_row() - 1) / (double) depth;
-        coef2 = 1 + (m - 1) / (double) depth * row_ones;
+        coef1 = 2 + (m * row_ones - col_ones * z.as_row() - 1) / static_cast<double> (depth);
+        coef2 = 1 + (m - 1) / static_cast<double> (depth) * row_ones;
         laguerrePolynomial.slice(depth) = coef1 % laguerrePolynomial.slice(depth - 1) - coef2 % laguerrePolynomial.slice(depth - 2);
     }
 }

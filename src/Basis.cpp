@@ -13,7 +13,7 @@ arma::mat Basis::basisFunc_mem(int m, int n, int nz, const arma::vec &rVec, cons
 
 
 arma::vec Basis::zPart(const arma::vec &zVec, int nz) {
-    long double const_factor = pow(bz, -0.5) * pow(PI, -0.25);
+    double const_factor = pow(bz, -0.5) * pow(PI, -0.25);
 
     for (int i = 1; i <= nz; i++) {
         const_factor *= pow(2 * i, -0.5);
@@ -27,7 +27,7 @@ arma::vec Basis::zPart(const arma::vec &zVec, int nz) {
 }
 
 arma::vec Basis::rPart(const arma::vec &rVec, int m, int n) {
-    long double const_factor = pow(br, -1) * pow(PI, -0.5);
+    double const_factor = pow(br, -1) * pow(PI, -0.5);
 
     for (int i = n + 1; i <= m + n; i++) {
         const_factor *= pow(i, -0.5);
@@ -56,7 +56,7 @@ Basis::Basis(double br, double bz, int N, double Q) : br(br), bz(bz) {
 
 int Basis::calcMMax(int N, double Q) {
     if (Q != 0) {
-        return floor((N + 2) * pow(Q, -1.0 / 3.0) - 0.5 * pow(Q, -1));
+        return static_cast<int>(floor((N + 2) * pow(Q, -1.0 / 3.0) - 0.5 * pow(Q, -1)));
     }
     return 0;
 }
@@ -76,22 +76,22 @@ arma::imat Basis::calcN_zMax(int N, double Q) {
 }
 
 arma::vec Basis::zPart_mem(const arma::vec &zVec, int nz) {
-    if (computed_z_indices.at(nz) == (long int) zVec.memptr()) {
+    if (computed_z_indices.at(nz) == reinterpret_cast<long int> ( zVec.memptr())){
         return computed_z_vals.at(nz);
     } else {
         arma::vec tmp = zPart(zVec, nz);
-        computed_z_indices.at(nz) = (long int) zVec.memptr();
+        computed_z_indices.at(nz) = reinterpret_cast<long int> ( zVec.memptr());
         computed_z_vals.at(nz) = tmp;
         return tmp;
     }
 }
 
 arma::vec Basis::rPart_mem(const arma::vec &rVec, int m, int n) {
-    if (computed_r_indices.at(m, n) == (long int) rVec.memptr()) {
+    if (computed_r_indices.at(m, n) == reinterpret_cast<long int> ( rVec.memptr())) {
         return computed_r_vals.at(n * (mMax + 1) + m);
     } else {
         arma::vec tmp = rPart(rVec, m, n);
-        computed_r_indices.at(m, n) = (long int) rVec.memptr();
+        computed_r_indices.at(m, n) = reinterpret_cast<long int> ( rVec.memptr());
         computed_r_vals.at(n * (mMax + 1) + m) = tmp;
         return tmp;
     }

@@ -12,9 +12,9 @@ Chrono::~Chrono() {
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
     if (!caller.empty()) {
-        std::cerr << "time in " << caller << " : " << duration.count() / 1000000.0 << "s" << std::endl;
+        std::cerr << "time in " << caller << " : " << static_cast<double>(duration.count()) / 1000000.0 << "s" << std::endl;
     } else {
-        std::cerr << "time " << duration.count() / 1000000.0 << "s" << std::endl;
+        std::cerr << "time " << static_cast<double>(duration.count()) / 1000000.0 << "s" << std::endl;
     }
 
 }

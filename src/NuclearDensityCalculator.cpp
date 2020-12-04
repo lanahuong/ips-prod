@@ -99,8 +99,8 @@ NuclearDensityCalculator::NuclearDensityCalculator() {
 
 
 double NuclearDensityCalculator::rho(int m, int n, int n_z, int mp, int np, int n_zp) {
-    int a = ind.at(n_z, n, m);
-    int b = ind.at(n_zp, np, mp);
+    auto a = ind.at(n_z, n, m);
+    auto b = ind.at(n_zp, np, mp);
     return imported_rho_values.at(a, b);
 }
 

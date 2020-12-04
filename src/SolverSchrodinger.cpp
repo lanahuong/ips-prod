@@ -69,7 +69,7 @@ bool SolverSchrodinger::test1DSolution(const arma::rowvec &z, arma::mat phi) {
     left = left + (MASS * OMEGA * OMEGA / 2.) * (ztrunc % phitrunc);
 
     // Compute right member
-    arma::mat E = (arma::regspace(0, (double) phi.n_rows - 1) + 1. / 2.)
+    arma::mat E = (arma::regspace(0, static_cast<double> ( phi.n_rows) - 1) + 1. / 2.)
                   * arma::rowvec(phitrunc.n_cols, arma::fill::ones) * H_BAR * OMEGA;
     arma::mat right = E % phitrunc;
 

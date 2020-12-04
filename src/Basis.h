@@ -76,8 +76,8 @@ public:
 
 private:
 
-    long double br{}; /**< Orthogonal deformation parameter */
-    long double bz{}; /**< Z deformation parameter */
+    double br; /**< Orthogonal deformation parameter */
+    double bz; /**< Z deformation parameter */
     Poly poly;
 
     /**
