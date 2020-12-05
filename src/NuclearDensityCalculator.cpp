@@ -5,6 +5,14 @@
 #include <omp.h>
 #include <memory>
 
+#include "FactorisationFinder.hpp"
+
+/**
+ *
+ * @param rVals
+ * @param zVals
+ * @return
+ */
 arma::mat NuclearDensityCalculator::naive_method(const arma::vec& rVals, const arma::vec& zVals)
 {
     Chrono local("naive_method");
@@ -48,6 +56,12 @@ arma::mat NuclearDensityCalculator::optimized_method1(const arma::vec& rVals, co
     return result;
 }
 
+/**
+ *
+ * @param rVals
+ * @param zVals
+ * @return
+ */
 arma::mat NuclearDensityCalculator::optimized_method2(const arma::vec& rVals, const arma::vec& zVals)
 {
     Chrono local("optimized_method2");
@@ -79,6 +93,57 @@ arma::mat NuclearDensityCalculator::optimized_method2(const arma::vec& rVals, co
     return builder->GetResult();
 }
 
+
+/**
+ * If we check some hadamard product properties, we can conclude that
+ * colA * rowA %  colB * rowB == (colA%colB) * (rowA%rowB) which allows
+ * us to do even mode factorisations !
+ * @param rVals
+ * @param zVals
+ * @return
+ */
+arma::mat NuclearDensityCalculator::optimized_method3(const arma::vec& rVals, const arma::vec& zVals)
+{
+    Chrono local("optimized_method3");
+    FactorisationHelper<struct nuclear_sum_entry, int> factor_na(nuclear_filter, select_nza);
+    arma::mat result = arma::zeros(rVals.size(), zVals.size()); // number of points on r- and z- axes
+    for (int m = 0; m<basis.mMax; m++) {
+        for (int n = 0; n<basis.nMax(m); n++) {
+            for (int n_z = 0; n_z<basis.n_zMax(m, n); n_z++) {
+                for (int mp = 0; mp<basis.mMax; mp++) {
+                    for (int np = 0; np<basis.nMax(mp); np++) {
+                        for (int n_zp = 0; n_zp<basis.n_zMax(mp, np); n_zp++) {
+                            factor_na.add({m, n, n_z, mp, np, n_zp});
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    auto list = factor_na.get_factored();
+    for(auto & nza_entry : list){
+        FactorisationHelper<struct nuclear_sum_entry, int> nzb_Factor(nza_entry.to_sum, nuclear_filter, select_nzb);
+        auto factored = nzb_Factor.get_factored();
+
+        for(auto & nzb_entry : factored){
+            for(auto e : nzb_entry.to_sum){
+                arma::mat funcA = basis.rPart(rVals, e.m_a, e.n_a).as_col() * basis.zPart(zVals, e.nz_a).as_row();
+                arma::mat funcB = basis.rPart(rVals, e.m_b, e.n_b).as_col() * basis.zPart(zVals, e.nz_b).as_row();
+                result += funcA%funcB*rho(e.m_a, e.n_a, e.nz_a, e.m_b, e.n_b, e.nz_b);
+            }
+        }
+    }
+
+
+
+    return result;
+}
+
+
+/**
+ *
+ */
 NuclearDensityCalculator::NuclearDensityCalculator()
 {
     imported_rho_values.load("src/rho.arma", arma::arma_ascii);
@@ -100,13 +165,25 @@ NuclearDensityCalculator::NuclearDensityCalculator()
     }
 }
 
-
+/**
+ *
+ * @param m
+ * @param n
+ * @param n_z
+ * @param mp
+ * @param np
+ * @param n_zp
+ * @return
+ */
 double NuclearDensityCalculator::rho(int m, int n, int n_z, int mp, int np, int n_zp) {
     auto a = ind.at(n_z, n, m);
     auto b = ind.at(n_zp, np, mp);
     return imported_rho_values.at(a, b);
 }
 
+/**
+ *
+ */
 void NuclearDensityCalculator::printRhoDefs()
 {
     uint i = 0;

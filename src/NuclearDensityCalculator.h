@@ -65,6 +65,8 @@ public:
     arma::mat optimized_method1(const arma::vec &rVals, const arma::vec &zVals);
 
     arma::mat optimized_method2(const arma::vec &rVals, const arma::vec &zVals);
+
+    arma::mat optimized_method3(const arma::vec& rVals, const arma::vec& zVals);
 };
 
 #endif //PROJET_IPS1_NUCLEARDENSITYCALCULATOR_H

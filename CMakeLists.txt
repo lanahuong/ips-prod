@@ -1,9 +1,8 @@
 cmake_minimum_required(VERSION 3.13)
 project(projet_ips1)
 set(CMAKE_CXX_STANDARD 11)
-set(COMPILE_OPTIONS PRIVATE -pedantic -ansi -Wshadow -Wdouble-promotion -Wundef -fno-common
-        -Wconversion -Wunused-parameter -Winit-self -Wuninitialized -Wmissing-declarations -Woverloaded-virtual -Wold-style-cast )
-
+set(COMPILE_OPTIONS PRIVATE -pedantic -ansi -Wshadow -Wdouble-promotion -Wundef -fno-common  -Wunused-parameter -Winit-self -Wuninitialized -Wmissing-declarations -Woverloaded-virtual -Wold-style-cast )
+#-Wconversion
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -march=native -mtune=native -fopenmp -Ofast -flto")
 
@@ -24,7 +23,7 @@ add_executable(main
         src/constants.h
         src/Basis.cpp src/savers/3Dsavers.cpp src/savers/3Dsavers.h
         src/NuclearDensityCalculator.cpp src/NuclearDensityCalculator.h
-        src/Chrono.cpp src/Chrono.h src/CallbackResultBuilder.hpp)
+        src/Chrono.cpp src/Chrono.h src/CallbackResultBuilder.hpp src/FactorisationFinder.hpp)
 target_link_libraries(main ${ARMADILLO_LIBRARIES})
 target_compile_options(main ${COMPILE_OPTIONS})
 
@@ -34,7 +33,7 @@ add_executable(tests src/Poly.cpp src/Basis.cpp src/Poly.h src/SolverSchrodinger
         src/savers/Saver.cpp src/savers/Saver.h src/constants.h
         src/NuclearDensityCalculator.cpp src/NuclearDensityCalculator.h
         tests/testsDerivator.cpp tests/testsMandatory.cpp
-        tests/testsNuclearDensityCalculator.cpp src/Chrono.cpp src/Chrono.h src/CallbackResultBuilder.hpp)
+        tests/testsNuclearDensityCalculator.cpp src/Chrono.cpp src/Chrono.h src/CallbackResultBuilder.hpp src/FactorisationFinder.hpp)
 target_link_libraries(tests ${ARMADILLO_LIBRARIES})
 target_compile_options(tests ${COMPILE_OPTIONS})
 target_link_libraries(tests gtest_main)

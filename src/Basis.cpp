@@ -41,7 +41,7 @@ arma::vec Basis::rPart(const arma::vec &rVec, int m, int n) {
     return const_factor * exp % pow % poly.laguerre(m, n);
 }
 
-Basis::Basis(double br, double bz, int N, double Q) : br(br), bz(bz) {
+Basis::Basis(double BR, double BZ, int N, double Q) :br(BR), bz(BZ) {
     this->mMax = calcMMax(N, Q);
     this->nMax = calcNMax();
     this->n_zMax = calcN_zMax(N, Q);

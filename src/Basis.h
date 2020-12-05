@@ -20,12 +20,12 @@ public:
 
     /**
      * Basis constructor
-     * @param br Basis deformation along radius
+     * @param BR Basis deformation along radius
      * @param bz Basis deformation along z axis
      * @param N Basis truncation parameter
      * @param Q Basis truncation parameter
      */
-    Basis(double br, double bz, int N, double Q);
+    Basis(double BR, double bz, int N, double Q);
 
     /**
      * Compute the r part of the function
