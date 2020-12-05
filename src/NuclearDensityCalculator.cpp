@@ -68,32 +68,27 @@ arma::mat NuclearDensityCalculator::optimized_method2(const arma::vec& rVals, co
     struct opt2_pair {
       int n, nz;
     };
-    int m_a = 0;
-    auto builder = std::make_shared<CallbackResultBuilder<arma::mat>>(arma::zeros(rVals.size(), zVals.size()), operation_type::Add);
-#pragma omp parallel for default(none) private(m_a) shared(builder, zVals, rVals)
-    for (m_a = 0; m_a<basis.mMax; m_a++) {
+    arma::mat builder = arma::zeros(rVals.size(), zVals.size());
+    for (int m_a = 0; m_a<basis.mMax; m_a++) {
         std::list<opt2_pair> list;
         for (int n_a = 0; n_a<basis.nMax(m_a); n_a++) {
             for (int n_z_a = 0; n_z_a<basis.n_zMax(m_a, n_a); n_z_a++) {
                 list.push_back({n_a, n_z_a});
             }
         }
-        std::list<opt2_pair>::iterator a;
-#pragma omp parallel default(none) private(a) shared(list, m_a, rVals, zVals, builder) //num_threads(5)
-        for (a = list.begin(); a!=list.end(); a++) {
+        for (std::list<opt2_pair>::iterator a = list.begin(); a!=list.end(); a++) {
             arma::mat tmp = arma::zeros(rVals.size(), zVals.size());
-            auto basisptr = std::make_shared<Basis>(br, bz, N, Q);
             for (auto b : list) {
-                tmp += basisptr->basisFunc_mem(m_a, b.n, b.nz, rVals, zVals)*rho(m_a, a->n, a->nz, m_a, b.n, b.nz);
+                tmp += basis.basisFunc_mem(m_a, b.n, b.nz, rVals, zVals)*rho(m_a, a->n, a->nz, m_a, b.n, b.nz);
             }
-            builder->push(basisptr->basisFunc_mem(m_a, a->n, a->nz, rVals, zVals)%tmp);
+            builder += basis.basisFunc_mem(m_a, a->n, a->nz, rVals, zVals)%tmp;
         }
     }
-    return builder->GetResult();
+    return builder;
 }
 
 /**
- * If we check some hadamard product properties, we can conclude that
+ * One can prove the following property:
  * colA * rowA %  colB * rowB == (colA%colB) * (rowA%rowB) which allows
  * us to do even mode factorisations !
  * @param rVals
@@ -119,32 +114,35 @@ arma::mat NuclearDensityCalculator::optimized_method3(const arma::vec& rVals, co
         }
     }
 
+    /* Thread safe accumulator to which we can send the results once we stop using openMP
+     * Is has its own buffer when the acc is locked and a spinlock mechanism as the operations
+     * are expected to be quite fast and not happen a lot */
     auto builder = std::make_shared<CallbackResultBuilder<arma::mat>>(arma::zeros(rVals.size(), zVals.size()), operation_type::Add);
     auto nza_entries = nza_factor.get_factored();
 #pragma omp parallel default(none)  shared(nza_entries, builder, rVals, zVals)
     for (auto& nza_entry : nza_entries) {
-        auto basisptr = std::make_shared<Basis>(br, bz, N, Q);
+        auto basis_local = basis; /* Its easier if each thread has its own Basis class */
         /* nza_zpart is the loop constant */
-        arma::rowvec nza_zpart = basisptr->zPart_mem(zVals, nza_entry.common).as_row();
+        arma::rowvec nza_zpart = basis_local.zPart_mem(zVals, nza_entry.factor).as_row();
         arma::mat tmp = arma::zeros(rVals.size(), zVals.size());
         /* We factor out nzb of the sum left to compute */
-        FactorisationHelper<struct nuclear_sum_entry, int> nzb_Factor(nza_entry.to_sum, nuclear_filter, select_nzb);
+        FactorisationHelper<struct nuclear_sum_entry, int> nzb_Factor(nza_entry.factored_out, nuclear_filter, select_nzb);
         auto nzb_entries = nzb_Factor.get_factored();
 #pragma omp single nowait
         for (auto& nzb_entry : nzb_entries) {
             /* nzb_zpart is the loop constant */
-            arma::rowvec nzb_zpart = basisptr->zPart_mem(zVals, nzb_entry.common).as_row();
+            arma::rowvec nzb_zpart = basis_local.zPart_mem(zVals, nzb_entry.factor).as_row();
             arma::colvec all_rpart = arma::zeros(rVals.size());
             /* We factor out the pair ma na of the sum that is left to compute */
-            FactorisationHelper<struct nuclear_sum_entry, struct m_n_pair> ma_na_factor(nzb_entry.to_sum, nuclear_filter, select_ma_na);
+            FactorisationHelper<struct nuclear_sum_entry, struct m_n_pair> ma_na_factor(nzb_entry.factored_out, nuclear_filter, select_ma_na);
             auto ma_na_entries = ma_na_factor.get_factored();
             for (auto& ma_na_entry : ma_na_entries) {
                 /* mana_rpart is the loop constant */
-                arma::colvec mana_rpart = basisptr->rPart_mem(rVals, ma_na_entry.common.m_a, ma_na_entry.common.n_a).as_col();
+                arma::colvec mana_rpart = basis_local.rPart_mem(rVals, ma_na_entry.factor.m_a, ma_na_entry.factor.n_a).as_col();
                 arma::colvec mbnb_rpart = arma::zeros(rVals.size());
                 /* We could factor out the pair mb and nb but its useless */
-                for (auto& e : ma_na_entry.to_sum) {
-                    mbnb_rpart += basisptr->rPart_mem(rVals, e.m_b, e.n_b).as_col()*rho(e.m_a, e.n_a, e.nz_a, e.m_b, e.n_b, e.nz_b);
+                for (auto& e : ma_na_entry.factored_out) {
+                    mbnb_rpart += basis_local.rPart_mem(rVals, e.m_b, e.n_b).as_col()*rho(e.m_a, e.n_a, e.nz_a, e.m_b, e.n_b, e.nz_b);
                 }
                 all_rpart += mbnb_rpart%mana_rpart;
             }
@@ -152,7 +150,7 @@ arma::mat NuclearDensityCalculator::optimized_method3(const arma::vec& rVals, co
         }
         builder->push(tmp%(arma::colvec(rVals.size(), arma::fill::ones)*nza_zpart));
     }
-    return builder->GetResult();
+    return builder->GetResult(); /* Computes pending operations and returns the result of the accumulator */
 }
 
 /**
