@@ -5,12 +5,11 @@
 #include <algorithm>
 
 struct nuclear_sum_entry {
-  int m_a;
-  int n_a;
-  int nz_a;
-  int m_b;
-  int n_b;
-  int nz_b;
+  int m_a, n_a, nz_a, m_b, n_b, nz_b;
+};
+
+struct ma_na_pair {
+  int m_a, n_a;
 };
 
 bool nuclear_symetry(nuclear_sum_entry a, nuclear_sum_entry b)
@@ -28,14 +27,20 @@ int select_nza(nuclear_sum_entry entry)
     return entry.nz_a;
 }
 
-
 int select_nzb(nuclear_sum_entry entry)
 {
     return entry.nz_b;
 }
 
+struct ma_na_pair select_ma_na(nuclear_sum_entry entry)
+{
+    return {entry.m_a, entry.n_a};
+}
 
-
+bool operator==(const struct ma_na_pair lhs, const struct ma_na_pair rhs)
+{
+    return lhs.m_a==rhs.m_a && lhs.n_a==rhs.n_a;
+}
 
 template<typename T, typename fa>
 struct factored {
