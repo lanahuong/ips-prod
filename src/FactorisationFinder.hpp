@@ -8,7 +8,7 @@ struct nuclear_sum_entry {
   int m_a, n_a, nz_a, m_b, n_b, nz_b;
 };
 
-struct ma_na_pair {
+struct m_n_pair {
   int m_a, n_a;
 };
 
@@ -32,14 +32,15 @@ int select_nzb(nuclear_sum_entry entry)
     return entry.nz_b;
 }
 
-struct ma_na_pair select_ma_na(nuclear_sum_entry entry)
+struct m_n_pair select_ma_na(nuclear_sum_entry entry)
 {
     return {entry.m_a, entry.n_a};
 }
 
-bool operator==(const struct ma_na_pair lhs, const struct ma_na_pair rhs)
+
+bool operator==(const struct m_n_pair l, const struct m_n_pair r)
 {
-    return lhs.m_a==rhs.m_a && lhs.n_a==rhs.n_a;
+    return l.m_a==r.m_a && l.n_a==r.n_a;
 }
 
 template<typename T, typename fa>

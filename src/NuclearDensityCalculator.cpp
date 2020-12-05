@@ -128,19 +128,19 @@ arma::mat NuclearDensityCalculator::optimized_method3(const arma::vec& rVals, co
 
         for (auto& nzb_entry : nzb_entries) { // all split sums with
             arma::rowvec nzb_zpart = basis.zPart(zVals, nzb_entry.factor).as_row();
-            FactorisationHelper<struct nuclear_sum_entry, struct ma_na_pair> ma_na_factor(nzb_entry.to_sum, nuclear_filter, select_ma_na);
+            FactorisationHelper<struct nuclear_sum_entry, struct m_n_pair> ma_na_factor(nzb_entry.to_sum, nuclear_filter, select_ma_na);
             auto ma_na_entries = ma_na_factor.get_factored();
 
+            arma::colvec all_rpart = arma::zeros(rVals.size());
             for (auto& ma_na_entry : ma_na_entries) {
                 arma::colvec mana_rpart = basis.rPart(rVals, ma_na_entry.factor.m_a, ma_na_entry.factor.n_a).as_col();
-                arma::mat funcA = mana_rpart*nza_zpart;
-
+                arma::colvec mbnb_rpart = arma::zeros(rVals.size());
                 for (auto& e : ma_na_entry.to_sum) {
-
-                    arma::mat funcB = basis.rPart(rVals, e.m_b, e.n_b).as_col()*nzb_zpart;
-                    result += funcA%funcB*rho(e.m_a, e.n_a, e.nz_a, e.m_b, e.n_b, e.nz_b);
+                    mbnb_rpart += basis.rPart(rVals, e.m_b, e.n_b).as_col()*rho(e.m_a, e.n_a, e.nz_a, e.m_b, e.n_b, e.nz_b);
                 }
+                all_rpart += (mana_rpart%mbnb_rpart);
             }
+            result += all_rpart*(nzb_zpart%nza_zpart);
         }
     }
     return result;
