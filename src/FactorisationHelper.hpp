@@ -23,6 +23,7 @@ static inline bool nuclear_symetry(quantum_numbers a, quantum_numbers b) {
     return a.n_a == b.n_b && a.m_a == b.m_b && a.nz_a == b.nz_b && a.n_b == b.n_a && a.m_b == b.m_a && a.nz_b == b.nz_a;
 }
 
+
 static inline bool nuclear_filter(quantum_numbers entry) {
     return entry.m_a == entry.m_b;
 }
@@ -94,6 +95,8 @@ public:
      * of the values that are in the list "factored_out"
      */
     std::list<struct factored<T, f>> get_factored();
+
+    std::vector<struct factored<T, f>> get_vfactored();
 private:
     input_filter filter;
     selector_function selector;
@@ -204,9 +207,17 @@ void FactorisationHelper<T, f>::remove_symetric_elts()
  * @tparam f
  */
 template<typename T, typename f>
-void FactorisationHelper<T, f>::remove_duplicates()
-{
+void FactorisationHelper<T, f>::remove_duplicates() {
     //TODO ? Same huge impact :/
 }
+
+template<typename T, typename f>
+std::vector<factored<T, f>> FactorisationHelper<T, f>::get_vfactored() {
+    std::list<factored<T, f>> list = get_factored();
+    std::vector<factored<T, f>> result(list.size());
+    std::copy(list.begin(), list.end(), result.begin());
+    return result;
+}
+
 
 #endif //PROJET_IPS1_FACTORISATIONFINDER_H
