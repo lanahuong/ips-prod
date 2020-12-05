@@ -27,9 +27,9 @@ TEST(NuclearDensityTest, opti1_opti2) {
 TEST(NuclearDensityTest, opti2_opti3) {
     NuclearDensityCalculator calc;
     double r_bound = 10;
-    double r_step = 0.5;
+    double r_step = 0.1;
     double z_bound = 20;
-    double z_step = 0.9;
+    double z_step = 0.1;
     arma::mat opti2 = calc.optimized_method2(arma::regspace(-r_bound, r_step, r_bound), arma::regspace(-z_bound, z_step, z_bound));
     arma::mat opti3 = calc.optimized_method3(arma::regspace(-r_bound, r_step, r_bound), arma::regspace(-z_bound, z_step, z_bound));
     ASSERT_NEAR(arma::norm(opti2 - opti3), 0.0, 1e-08);

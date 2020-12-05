@@ -143,14 +143,15 @@ arma::mat NuclearDensityCalculator::optimized_method3(const arma::vec& rVals, co
                 arma::colvec mana_rpart = basis.rPart_mem(rVals, ma_na_entry.factor.m_a, ma_na_entry.factor.n_a).as_col();
                 arma::colvec mbnb_rpart = arma::zeros(rVals.size());
                 /* We could factor out the pair mb and nb but its useless */
+
                 for (auto& e : ma_na_entry.to_sum) {
                     mbnb_rpart += basis.rPart_mem(rVals, e.m_b, e.n_b).as_col()*rho(e.m_a, e.n_a, e.nz_a, e.m_b, e.n_b, e.nz_b);
                 }
-                all_rpart += mana_rpart%mbnb_rpart;
+                all_rpart += mbnb_rpart%mana_rpart;
             }
-            tmp += all_rpart * nza_zpart;
+            tmp += all_rpart*nzb_zpart;
         }
-        result += tmp % (arma::colvec(rVals.size(), arma::fill::ones)*nza_zpart);
+        result += tmp%(arma::colvec(rVals.size(), arma::fill::ones)*nza_zpart);
     }
     return result;
 }
