@@ -124,7 +124,7 @@ arma::mat NuclearDensityCalculator::optimized_method3(const arma::vec& rVals, co
     auto nza_entries = nza_factor.get_factored();
     for (auto& nza_entry : nza_entries) {
         /* nza_zpart is the loop constant */
-        arma::rowvec nza_zpart = basis.zPart_mem(zVals, nza_entry.factor).as_row();
+        arma::rowvec nza_zpart = basis.zPart_mem(zVals, nza_entry.common).as_row();
         arma::mat tmp = arma::zeros(rVals.size(), zVals.size());
         /* We factor out nzb of the sum to do */
         FactorisationHelper<struct nuclear_sum_entry, int> nzb_Factor(nza_entry.to_sum, nuclear_filter, select_nzb);
@@ -132,7 +132,7 @@ arma::mat NuclearDensityCalculator::optimized_method3(const arma::vec& rVals, co
 
         for (auto& nzb_entry : nzb_entries) {
             /* nzb_zpart is the loop constant */
-            arma::rowvec nzb_zpart = basis.zPart_mem(zVals, nzb_entry.factor).as_row();
+            arma::rowvec nzb_zpart = basis.zPart_mem(zVals, nzb_entry.common).as_row();
             arma::colvec all_rpart = arma::zeros(rVals.size());
             /* We factor out the pair ma_na of the sum that is left to compute */
             FactorisationHelper<struct nuclear_sum_entry, struct m_n_pair> ma_na_factor(nzb_entry.to_sum, nuclear_filter, select_ma_na);
@@ -140,7 +140,7 @@ arma::mat NuclearDensityCalculator::optimized_method3(const arma::vec& rVals, co
 
             for (auto& ma_na_entry : ma_na_entries) {
                 /* mana_rpart is the loop constant */
-                arma::colvec mana_rpart = basis.rPart_mem(rVals, ma_na_entry.factor.m_a, ma_na_entry.factor.n_a).as_col();
+                arma::colvec mana_rpart = basis.rPart_mem(rVals, ma_na_entry.common.m_a, ma_na_entry.common.n_a).as_col();
                 arma::colvec mbnb_rpart = arma::zeros(rVals.size());
                 /* We could factor out the pair mb and nb but its useless */
 

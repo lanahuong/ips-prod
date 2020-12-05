@@ -45,7 +45,7 @@ bool operator==(const struct m_n_pair l, const struct m_n_pair r)
 
 template<typename T, typename fa>
 struct factored {
-  fa factor;
+  fa common;
   std::list<T> to_sum;
 };
 
@@ -74,7 +74,7 @@ void FactorisationHelper<T, f>::dispatch_entry(T entry)
 {
 
     f fac = selector(entry);
-    auto it = std::find_if(out.begin(), out.end(), [&fac](const struct factored<T, f>& x) { return x.factor==fac; });
+    auto it = std::find_if(out.begin(), out.end(), [&fac](const struct factored<T, f>& x) { return x.common==fac; });
     if (it!=out.end()) {
         (*it).to_sum.push_back(entry);
     }
