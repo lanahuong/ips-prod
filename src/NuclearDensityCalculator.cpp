@@ -105,7 +105,8 @@ arma::mat NuclearDensityCalculator::optimized_method3(const arma::vec& rVals, co
 {
     Chrono local("optimized_method3");
     FactorisationHelper<struct nuclear_sum_entry, int> nza_factor(nuclear_filter, select_nza);
-    arma::mat result = arma::zeros(rVals.size(), zVals.size()); // number of points on r- and z- axes
+    /* Rather than making things hard, let's just use the most naive method */
+    arma::mat result = arma::zeros(rVals.size(), zVals.size());
     for (int m = 0; m<basis.mMax; m++) {
         for (int n = 0; n<basis.nMax(m); n++) {
             for (int n_z = 0; n_z<basis.n_zMax(m, n); n_z++) {
@@ -121,27 +122,35 @@ arma::mat NuclearDensityCalculator::optimized_method3(const arma::vec& rVals, co
     }
 
     auto nza_entries = nza_factor.get_factored();
-    for (auto& nza_entry : nza_entries) { // we split the sum over a list struct of list. each struct has a constant element, here nza and a list of variables to sum
+    for (auto& nza_entry : nza_entries) {
+        /* nza_zpart is the loop constant */
+        arma::rowvec nza_zpart = basis.zPart_mem(zVals, nza_entry.factor).as_row();
+        arma::mat tmp = arma::zeros(rVals.size(), zVals.size());
+        /* We factor out nzb of the sum to do */
         FactorisationHelper<struct nuclear_sum_entry, int> nzb_Factor(nza_entry.to_sum, nuclear_filter, select_nzb);
         auto nzb_entries = nzb_Factor.get_factored();
-        arma::rowvec nza_zpart = basis.zPart(zVals, nza_entry.factor).as_row();
 
-        for (auto& nzb_entry : nzb_entries) { // all split sums with
-            arma::rowvec nzb_zpart = basis.zPart(zVals, nzb_entry.factor).as_row();
+        for (auto& nzb_entry : nzb_entries) {
+            /* nzb_zpart is the loop constant */
+            arma::rowvec nzb_zpart = basis.zPart_mem(zVals, nzb_entry.factor).as_row();
+            arma::colvec all_rpart = arma::zeros(rVals.size());
+            /* We factor out the pair ma_na of the sum that is left to compute */
             FactorisationHelper<struct nuclear_sum_entry, struct m_n_pair> ma_na_factor(nzb_entry.to_sum, nuclear_filter, select_ma_na);
             auto ma_na_entries = ma_na_factor.get_factored();
 
-            arma::colvec all_rpart = arma::zeros(rVals.size());
             for (auto& ma_na_entry : ma_na_entries) {
-                arma::colvec mana_rpart = basis.rPart(rVals, ma_na_entry.factor.m_a, ma_na_entry.factor.n_a).as_col();
+                /* mana_rpart is the loop constant */
+                arma::colvec mana_rpart = basis.rPart_mem(rVals, ma_na_entry.factor.m_a, ma_na_entry.factor.n_a).as_col();
                 arma::colvec mbnb_rpart = arma::zeros(rVals.size());
+                /* We could factor out the pair mb and nb but its useless */
                 for (auto& e : ma_na_entry.to_sum) {
-                    mbnb_rpart += basis.rPart(rVals, e.m_b, e.n_b).as_col()*rho(e.m_a, e.n_a, e.nz_a, e.m_b, e.n_b, e.nz_b);
+                    mbnb_rpart += basis.rPart_mem(rVals, e.m_b, e.n_b).as_col()*rho(e.m_a, e.n_a, e.nz_a, e.m_b, e.n_b, e.nz_b);
                 }
-                all_rpart += (mana_rpart%mbnb_rpart);
+                all_rpart += mana_rpart%mbnb_rpart;
             }
-            result += all_rpart*(nzb_zpart%nza_zpart);
+            tmp += all_rpart * nza_zpart;
         }
+        result += tmp % (arma::colvec(rVals.size(), arma::fill::ones)*nza_zpart);
     }
     return result;
 }
