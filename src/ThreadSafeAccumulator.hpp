@@ -1,10 +1,10 @@
 /**
- * @file CallbackResultBuilder.hpp
+ * @file ThreadSafeAccumulator.hpp
  */
 
 
-#ifndef PROJET_IPS1_CALLBACKRESULTBUILDER_HPP
-#define PROJET_IPS1_CALLBACKRESULTBUILDER_HPP
+#ifndef PROJET_IPS1_THREADSAFEACCUMULATOR_HPP
+#define PROJET_IPS1_THREADSAFEACCUMULATOR_HPP
 
 #include <list>
 
@@ -14,10 +14,11 @@
 enum class operation_type {
     Add,
     Mul,
+    Nop,
 };
 
 /**
- * @class CallbackResultBuilder
+ * @class ThreadSafeAccumulator
  * Thread safe accumulator to make commutative operations on a single buffer/result
  *
  * If the accumulator is not accessible (if we are making expensive operations (matrix multiplication ?)), the argument is buffered
@@ -25,14 +26,17 @@ enum class operation_type {
  * @tparam T
  */
 template<typename T>
-class CallbackResultBuilder {
+class ThreadSafeAccumulator {
 public:
+    typedef T (* acc_function)(T accumulator, T arg);
     /**
      * Constructor to use
      * @param acc the initial value, like an empty matrix, or whatever
      * @param type commutative operation that is going to be performed
      */
-    explicit CallbackResultBuilder(const T &acc, operation_type type);
+    ThreadSafeAccumulator(const T& acc, operation_type type);
+
+    ThreadSafeAccumulator(const T& acc, acc_function function);
 
     /**
      * Computes buffered ops if needed
@@ -44,7 +48,7 @@ public:
      * Pushes a value to the accumulator.
      * @param arg
      */
-    inline void push(const T &arg);
+    inline void push(const T& arg);
 
 private:
     inline void acquire_lock();
@@ -55,18 +59,19 @@ private:
 
     inline void release_buffer_lock();
 
-    inline void exec_operation(const T &arg);
+    inline void exec_operation(const T& arg);
 
+    acc_function fun = nullptr;
     T result;
-    operation_type op;
+    operation_type op = operation_type::Nop;
     std::list<T> buffer{};
     volatile bool result_locked = false;
     volatile bool buffer_locked = false;
 };
 
-
 template<typename T>
-T CallbackResultBuilder<T>::GetResult() {
+T ThreadSafeAccumulator<T>::GetResult()
+{
     for (auto r : buffer) {
         exec_operation(r);
     }
@@ -74,15 +79,22 @@ T CallbackResultBuilder<T>::GetResult() {
 }
 
 template<typename T>
-CallbackResultBuilder<T>::CallbackResultBuilder(const T &acc, operation_type type) : result(acc), op(type) {}
+ThreadSafeAccumulator<T>::ThreadSafeAccumulator(const T& acc, operation_type type)
+        : result(acc), op(type) { }
 
 template<typename T>
-inline void CallbackResultBuilder<T>::push(const T &arg) {
+ThreadSafeAccumulator<T>::ThreadSafeAccumulator(const T& acc, acc_function function)
+        : result(acc), fun(function) { }
+
+template<typename T>
+inline void ThreadSafeAccumulator<T>::push(const T& arg)
+{
     if (result_locked) {
         acquire_buffer_lock();
         buffer.push_back(arg);
         release_buffer_lock();
-    } else {
+    }
+    else {
         acquire_lock();
         exec_operation(arg);
         release_lock();
@@ -90,26 +102,30 @@ inline void CallbackResultBuilder<T>::push(const T &arg) {
 }
 
 template<typename T>
-inline void CallbackResultBuilder<T>::acquire_lock() {
+inline void ThreadSafeAccumulator<T>::acquire_lock()
+{
     while (result_locked) {// we wait
     }
     result_locked = true;
 }
 
 template<typename T>
-inline void CallbackResultBuilder<T>::acquire_buffer_lock() {
+inline void ThreadSafeAccumulator<T>::acquire_buffer_lock()
+{
     while (buffer_locked) {// we wait
     }
     buffer_locked = true;
 }
 
 template<typename T>
-inline void CallbackResultBuilder<T>::release_lock() {
+inline void ThreadSafeAccumulator<T>::release_lock()
+{
     result_locked = false;
 }
 
 template<typename T>
-inline void CallbackResultBuilder<T>::release_buffer_lock() {
+inline void ThreadSafeAccumulator<T>::release_buffer_lock()
+{
     buffer_locked = false;
 }
 
@@ -119,15 +135,20 @@ inline void CallbackResultBuilder<T>::release_buffer_lock() {
  * @param arg
  */
 template<typename T>
-inline void CallbackResultBuilder<T>::exec_operation(const T &arg) {
-    if (this->op == operation_type::Add) {
+inline void ThreadSafeAccumulator<T>::exec_operation(const T& arg)
+{
+    if (this->op==operation_type::Add) {
         result += arg;
-    } else if (this->op == operation_type::Mul) {
+    }
+    else if (this->op==operation_type::Mul) {
         result *= arg;
-    } else {
-        //TODO CRASH BECAUSE NOT IMPLEMENTED
+    }
+    else if (fun) {
+        result = fun(result, arg);
+    }
+    else if (this->op==operation_type::Nop) {
+        std::cerr << "No op defined in accumulator" << std::endl;
     }
 }
 
-
-#endif //PROJET_IPS1_CALLBACKRESULTBUILDER_HPP
+#endif //PROJET_IPS1_THREADSAFEACCUMULATOR_HPP

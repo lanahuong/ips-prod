@@ -1,11 +1,11 @@
 #include "NuclearDensityCalculator.h"
 #include "Chrono.h"
-#include "CallbackResultBuilder.hpp"
+#include "ThreadSafeAccumulator.hpp"
 #include <list>
 #include <omp.h>
 #include <memory>
 
-#include "FactorisationFinder.hpp"
+#include "FactorisationHelper.hpp"
 
 /**
  *
@@ -76,12 +76,12 @@ arma::mat NuclearDensityCalculator::optimized_method2(const arma::vec& rVals, co
                 list.push_back({n_a, n_z_a});
             }
         }
-        for (std::list<opt2_pair>::iterator a = list.begin(); a!=list.end(); a++) {
+        for (auto a = list.begin(); a!=list.end(); a++) {
             arma::mat tmp = arma::zeros(rVals.size(), zVals.size());
             for (auto b : list) {
-                tmp += basis.basisFunc_mem(m_a, b.n, b.nz, rVals, zVals)*rho(m_a, a->n, a->nz, m_a, b.n, b.nz);
+                tmp += basis.basisFunc(m_a, b.n, b.nz, rVals, zVals)*rho(m_a, a->n, a->nz, m_a, b.n, b.nz);
             }
-            builder += basis.basisFunc_mem(m_a, a->n, a->nz, rVals, zVals)%tmp;
+            builder += basis.basisFunc(m_a, a->n, a->nz, rVals, zVals)%tmp;
         }
     }
     return builder;
@@ -117,13 +117,14 @@ arma::mat NuclearDensityCalculator::optimized_method3(const arma::vec& rVals, co
     /* Thread safe accumulator to which we can send the results once we stop using openMP
      * Is has its own buffer when the acc is locked and a spinlock mechanism as the operations
      * are expected to be quite fast and not happen a lot */
-    auto builder = std::make_shared<CallbackResultBuilder<arma::mat>>(arma::zeros(rVals.size(), zVals.size()), operation_type::Add);
+    auto builder = std::make_shared<ThreadSafeAccumulator<arma::mat>>(arma::zeros(rVals.size(), zVals.size()), operation_type::Add);
+    arma::colvec unit = arma::colvec(rVals.size(), arma::fill::ones);
     auto nza_entries = nza_factor.get_factored();
-#pragma omp parallel default(none)  shared(nza_entries, builder, rVals, zVals)
+#pragma omp parallel default(none) shared(nza_entries, builder, rVals, zVals, unit)
     for (auto& nza_entry : nza_entries) {
-        auto basis_local = basis; /* Its easier if each thread has its own Basis class */
+        auto basis_local = Basis(br, bz, N, Q, rVals, zVals); /* Its easier if each thread has its own Basis class */
         /* nza_zpart is the loop constant */
-        arma::rowvec nza_zpart = basis_local.zPart_mem(zVals, nza_entry.factor).as_row();
+        arma::rowvec nza_zpart = basis_local.zPart_mem(nza_entry.factor).as_row();
         arma::mat tmp = arma::zeros(rVals.size(), zVals.size());
         /* We factor out nzb of the sum left to compute */
         FactorisationHelper<struct nuclear_sum_entry, int> nzb_Factor(nza_entry.factored_out, nuclear_filter, select_nzb);
@@ -131,24 +132,24 @@ arma::mat NuclearDensityCalculator::optimized_method3(const arma::vec& rVals, co
 #pragma omp single nowait
         for (auto& nzb_entry : nzb_entries) {
             /* nzb_zpart is the loop constant */
-            arma::rowvec nzb_zpart = basis_local.zPart_mem(zVals, nzb_entry.factor).as_row();
+            arma::rowvec nzb_zpart = basis_local.zPart_mem(nzb_entry.factor).as_row();
             arma::colvec all_rpart = arma::zeros(rVals.size());
             /* We factor out the pair ma na of the sum that is left to compute */
             FactorisationHelper<struct nuclear_sum_entry, struct m_n_pair> ma_na_factor(nzb_entry.factored_out, nuclear_filter, select_ma_na);
             auto ma_na_entries = ma_na_factor.get_factored();
             for (auto& ma_na_entry : ma_na_entries) {
                 /* mana_rpart is the loop constant */
-                arma::colvec mana_rpart = basis_local.rPart_mem(rVals, ma_na_entry.factor.m_a, ma_na_entry.factor.n_a).as_col();
+                arma::colvec mana_rpart = basis_local.rPart_mem(ma_na_entry.factor.m_a, ma_na_entry.factor.n_a).as_col();
                 arma::colvec mbnb_rpart = arma::zeros(rVals.size());
                 /* We could factor out the pair mb and nb but its useless */
                 for (auto& e : ma_na_entry.factored_out) {
-                    mbnb_rpart += basis_local.rPart_mem(rVals, e.m_b, e.n_b).as_col()*rho(e.m_a, e.n_a, e.nz_a, e.m_b, e.n_b, e.nz_b);
+                    mbnb_rpart += basis_local.rPart_mem(e.m_b, e.n_b).as_col()*rho(e.m_a, e.n_a, e.nz_a, e.m_b, e.n_b, e.nz_b);
                 }
                 all_rpart += mbnb_rpart%mana_rpart;
             }
             tmp += all_rpart*nzb_zpart;
         }
-        builder->push(tmp%(arma::colvec(rVals.size(), arma::fill::ones)*nza_zpart));
+        builder->push(tmp%(unit*nza_zpart));
     }
     return builder->GetResult(); /* Computes pending operations and returns the result of the accumulator */
 }

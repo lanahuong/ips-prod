@@ -21,7 +21,7 @@ private:
     /**
      * Okay, well, I dont know how to make it simpler unless if we cheat with void pointers...
      */
-    std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::duration<long int, std::ratio<1, 1000000000> > > start;
+    std::chrono::time_point<std::chrono::system_clock, std::chrono::duration<long int, std::ratio<1, 1000000000> > > start;
 };
 
 

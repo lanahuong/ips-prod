@@ -49,23 +49,32 @@ public:
     arma::icube ind;
 
     /**
-     * Naive method seen in the lesson
+     * Naive method seen in the class
      * @param rVals
      * @param zVals
      * @return a matrix
      */
-    arma::mat naive_method(const arma::vec &rVals, const arma::vec &zVals);
+    arma::mat naive_method(const arma::vec& rVals, const arma::vec& zVals);
 
     /**
-     * Optimized method
-     * @param rVals
-     * @param zVals
-     * @return
+     * Optimized method 1
      */
-    arma::mat optimized_method1(const arma::vec &rVals, const arma::vec &zVals);
+    arma::mat optimized_method1(const arma::vec& rVals, const arma::vec& zVals);
 
-    arma::mat optimized_method2(const arma::vec &rVals, const arma::vec &zVals);
+    /**
+     * Manually trying to factor out some values, but doesnt really work in a clean manner
+     * Plus multithreading is a useless as the first loop has very unequal branches in term
+     * of computing needed. Thus the threads are unbalanced
+     */
+    arma::mat optimized_method2(const arma::vec& rVals, const arma::vec& zVals);
 
+    /**
+     * Most optimized method.
+     * It uses the memoised version of the @class Basis.
+     * It uses multithreading with openMP but can be ported to use native threads
+     * It uses the factorisation helper to extract the four sub_sums from the
+     * naive one.
+     */
     arma::mat optimized_method3(const arma::vec& rVals, const arma::vec& zVals);
 };
 
