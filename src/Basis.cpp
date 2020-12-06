@@ -48,7 +48,7 @@ arma::mat Basis::basisFunc(int m, int n, int nz, const arma::vec& rVec, const ar
     return rPart(rVec, m, n).as_col()*zPart(zVec, nz).as_row();
 }
 
-inline arma::vec Basis::zPart(const arma::vec& zVec, int nz, bool use_mem)
+arma::vec Basis::zPart(const arma::vec& zVec, int nz, bool use_mem)
 {
     double const_factor = pow(bz, -0.5)*pow(PI, -0.25);
 
@@ -63,7 +63,7 @@ inline arma::vec Basis::zPart(const arma::vec& zVec, int nz, bool use_mem)
     return const_factor*exp%poly.hermite(nz);
 }
 
-inline arma::vec Basis::rPart(const arma::vec& rVec, int m, int n, bool use_mem)
+arma::vec Basis::rPart(const arma::vec& rVec, int m, int n, bool use_mem)
 {
     double const_factor = pow(br, -1)*pow(PI, -0.5);
 
@@ -112,7 +112,7 @@ arma::mat Basis::basisFunc_mem(int m, int n, int nz)
  * Returns the value if it was alreadu computed else computes it and
  * saves it.
  */
-inline arma::vec Basis::zPart_mem(int nz)
+arma::vec Basis::zPart_mem(int nz)
 {
     if (computed_z_indices.at(nz)) {
         return computed_z_vals.at(nz);
@@ -128,7 +128,7 @@ inline arma::vec Basis::zPart_mem(int nz)
 /**
  * Returns the already computed value else computes it
  */
-inline arma::vec Basis::rPart_mem(int m, int n)
+arma::vec Basis::rPart_mem(int m, int n)
 {
     if (computed_r_indices.at(n*(mMax+1)+m)) {
         return computed_r_vals.at(n*(mMax+1)+m);

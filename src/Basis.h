@@ -51,7 +51,7 @@ public:
      * set to be memoised.
      * @return the r part of the function
      */
-    inline arma::vec rPart(const arma::vec& rVec, int m, int n, bool use_mem = false);
+    arma::vec rPart(const arma::vec& rVec, int m, int n, bool use_mem = false);
 
     /**
      * Function used to access memoised values.
@@ -67,7 +67,7 @@ public:
      * set to be memoised.
      * @return the z part of the function
      */
-    inline arma::vec zPart(const arma::vec& zVec, int nz, bool use_mem = false);
+    arma::vec zPart(const arma::vec& zVec, int nz, bool use_mem = false);
 
     /**
      * Function used to access memoised values.
