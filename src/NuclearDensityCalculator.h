@@ -12,10 +12,10 @@
  */
 class NuclearDensityCalculator {
 private:
-    int N = 14;
-    double Q = 1.3;
-    double br = 1.935801664793151;
-    double bz = 2.829683956491218;
+    const int N = 14;
+    const double Q = 1.3;
+    const double br = 1.935801664793151;
+    const double bz = 2.829683956491218;
     arma::mat imported_rho_values;
     Basis basis;
 
@@ -28,7 +28,7 @@ private:
      * we dont know how to compute them.
      * @return
      */
-    inline double rho(int m, int n, int n_z, int mp, int np, int n_zp);
+    inline double rho(int m, int n, int n_z, int mp, int np, int n_zp) const;
 
 public:
 

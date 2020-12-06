@@ -18,9 +18,9 @@
 class Basis {
 public:
 
-    int mMax{}; /**< Holds the maximum quantum number m for the basis */
-    arma::ivec nMax; /**< Holds a vector of principal quantum numbers considered for the basis */
-    arma::imat n_zMax; /**< nz quantum numbers */
+    const int mMax{}; /**< Holds the maximum quantum number m for the basis */
+    const arma::ivec nMax; /**< Holds a vector of principal quantum numbers considered for the basis */
+    const arma::imat n_zMax; /**< nz quantum numbers */
 
 
     Basis() = default;
@@ -93,8 +93,8 @@ private:
 
 
     bool is_mem = false; /**< Is set to true if the rVec and zVec were given at construction -> memoisation  */
-    arma::vec rvec_mem{};/**< rVec given in the constructor */
-    arma::vec zvec_mem{};/**< zVec given in the constructor */
+    arma::vec rvec_mem;/**< rVec given in the constructor */
+    arma::vec zvec_mem;/**< zVec given in the constructor */
     arma::vec squared_rarg_mem{};/**< pre-computed vector if is_mem */
     arma::vec squared_zarg_mem{};/**< pre-computed vector if is_mem */
     arma::vec zexp_mem{};/**< pre-computed vector if is_mem */

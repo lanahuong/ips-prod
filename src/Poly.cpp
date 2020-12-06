@@ -30,23 +30,21 @@ void Poly::calcLaguerre(int mMax, int nMax, const arma::vec &z) {
      * Initialize the cube and helper vectors. Initialize also the first two slices (if needed) for the recursion
      */
     laguerrePolynomial = arma::cube(mMax, z.n_elem, nMax, arma::fill::ones);
-    arma::vec m = arma::regspace(0, mMax - 1).as_col();
-    arma::rowvec row_ones = arma::vec(z.n_elem, arma::fill::ones).as_row();
-    arma::colvec col_ones = arma::vec(mMax, arma::fill::ones).as_col();
-    if (nMax > 1) {
-        laguerrePolynomial.slice(1) = 1 + (m * row_ones) - col_ones * z.as_row();
+    const arma::vec m = arma::regspace(0, mMax-1).as_col();
+    const arma::rowvec row_ones = arma::vec(z.n_elem, arma::fill::ones).as_row();
+    const arma::colvec col_ones = arma::vec(mMax, arma::fill::ones).as_col();
+    if (nMax>1) {
+        laguerrePolynomial.slice(1) = 1+(m*row_ones)-col_ones*z.as_row();
     }
 
-    arma::mat coef1;
-    arma::mat coef2;
     /**
      * Now we build our cube, each slice is a matrix and within such slice N is constant, so we
      * will operate on slices, its faster.
      * The slice 0 is already filled with ones
      */
-    for (int depth = 2; depth < nMax; depth++) {
-        coef1 = 2 + (m * row_ones - col_ones * z.as_row() - 1) / static_cast<double> (depth);
-        coef2 = 1 + (m - 1) / static_cast<double> (depth) * row_ones;
-        laguerrePolynomial.slice(depth) = coef1 % laguerrePolynomial.slice(depth - 1) - coef2 % laguerrePolynomial.slice(depth - 2);
+    for (int depth = 2; depth<nMax; depth++) {
+        arma::mat coef1(2+(m*row_ones-col_ones*z.as_row()-1)/static_cast<double> (depth));
+        arma::mat coef2(1+(m-1)/static_cast<double> (depth)*row_ones);
+        laguerrePolynomial.slice(depth) = coef1%laguerrePolynomial.slice(depth-1)-coef2%laguerrePolynomial.slice(depth-2);
     }
 }

@@ -61,8 +61,8 @@ public:
 
     std::vector<struct factored<T, f>> get_vfactored();
 private:
-    input_filter filter;
-    selector_function selector;
+    const input_filter filter;
+    const selector_function selector;
     std::list<struct factored<T, f>> out{};
 
     /**
@@ -125,12 +125,6 @@ FactorisationHelper<T, f>::FactorisationHelper(std::list<T> input, Factorisation
 }
 
 
-/**
- *
- * @tparam T
- * @tparam f
- * @param entry
- */
 template<typename T, typename f>
 inline void FactorisationHelper<T, f>::add(T entry) {
     if (filter(entry)) {
@@ -138,12 +132,6 @@ inline void FactorisationHelper<T, f>::add(T entry) {
     }
 }
 
-/**
- *
- * @tparam T
- * @tparam f
- * @return
- */
 template<typename T, typename f>
 std::list<struct factored<T, f>> FactorisationHelper<T, f>::get_factored()
 {
@@ -183,22 +171,6 @@ std::vector<factored<T, f>> FactorisationHelper<T, f>::get_vfactored() {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**
  * Specitic types and functions defined to fit our problem
  */
@@ -218,7 +190,8 @@ static inline bool nuclear_filter(quantum_numbers entry) {
     return entry.m_a == entry.m_b;
 }
 
-static inline int select_nza(quantum_numbers entry) {
+static inline int select_nza(quantum_numbers entry)
+{
     return entry.nz_a;
 }
 

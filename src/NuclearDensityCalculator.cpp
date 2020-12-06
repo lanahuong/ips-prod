@@ -97,6 +97,8 @@ arma::mat NuclearDensityCalculator::optimized_method2(const arma::vec& rVals, co
 arma::mat NuclearDensityCalculator::optimized_method3(const arma::vec& rVals, const arma::vec& zVals)
 {
     Chrono local("optimized_method3");
+    const int zSize(zVals.size());
+    const int rSize(rVals.size());
     FactorisationHelper<struct quantum_numbers, int> nza_factor(select_nza, nuclear_filter);
     /* Rather than making things hard, let's just use the most naive method */
     for (int m = 0; m<basis.mMax; m++) {
@@ -115,39 +117,36 @@ arma::mat NuclearDensityCalculator::optimized_method3(const arma::vec& rVals, co
             }
         }
     }
-
-
-
     /* Thread safe accumulator to which we can send the results once we stop using openMP
      * Is has its own buffer when the acc is locked and a spinlock mechanism as the operations
      * are expected to be quite fast and not happen a lot */
-    std::shared_ptr<ThreadSafeAccumulator<arma::mat>> builder(std::make_shared<ThreadSafeAccumulator<arma::mat>>(arma::zeros(rVals.size(), zVals.size()), operation_type::Add));
-    arma::colvec unit(rVals.size(), arma::fill::ones);
-    std::vector<factored<quantum_numbers, int>> nza_entries(nza_factor.get_vfactored());
-    Basis basis_shared(br, bz, N, Q, rVals, zVals); /* Its easier if each thread has its own Basis class */
-#pragma omp parallel for default(none) shared(nza_entries, builder, rVals, zVals, unit, basis_shared)
+    std::shared_ptr<ThreadSafeAccumulator<arma::mat>> builder(std::make_shared<ThreadSafeAccumulator<arma::mat>>(arma::zeros(rSize, zSize), operation_type::Add));
+    const arma::colvec unit(rSize, arma::fill::ones);
+    const std::vector<factored<quantum_numbers, int>> nza_entries(nza_factor.get_vfactored());
+    const Basis basis_shared(br, bz, N, Q, rVals, zVals); /* Its easier if each thread has its own Basis class */
+#pragma omp parallel for default(none) shared(nza_entries, builder, unit, basis_shared, zSize, rSize)
     /* nza_zpart is the loop constant */
     for (const auto& nza_entry : nza_entries) {
         Basis basis_local(basis_shared); /* We copy the basis in each thread, strangely the private openMP dont work */
-        arma::rowvec nza_zpart(basis_local.zPart_mem(nza_entry.factor).as_row());
-        arma::mat tmp(arma::zeros(rVals.size(), zVals.size()));
+        const arma::rowvec nza_zpart(basis_local.zPart_mem(nza_entry.factor).as_row());
+        arma::mat tmp(arma::zeros(rSize, zSize));
         /* We factor out nzb of the sum left to compute */
         FactorisationHelper<quantum_numbers, int> nzb_Factor(nza_entry.factored_out, select_nzb, nuclear_filter);
-        std::list<factored<quantum_numbers, int>> nzb_entries(nzb_Factor.get_factored());
+        const std::list<factored<quantum_numbers, int>> nzb_entries(nzb_Factor.get_factored());
         /* nzb_zpart is the loop constant */
-        for (factored<quantum_numbers, int>& nzb_entry : nzb_entries) {
-            arma::rowvec nzb_zpart(basis_local.zPart_mem(nzb_entry.factor).as_row());
-            arma::colvec all_rpart(arma::zeros(rVals.size()));
+        for (const factored<quantum_numbers, int>& nzb_entry : nzb_entries) {
+            const arma::rowvec nzb_zpart(basis_local.zPart_mem(nzb_entry.factor).as_row());
+            arma::colvec all_rpart(arma::zeros(rSize));
             /* We factor out the pair ma na of the sum that is left to compute */
             FactorisationHelper<quantum_numbers, m_n_pair> ma_na_factor(nzb_entry.factored_out, select_ma_na, nuclear_filter);
-            std::list<factored<quantum_numbers, m_n_pair>> ma_na_entries(ma_na_factor.get_factored());
+            const std::list<factored<quantum_numbers, m_n_pair>> ma_na_entries(ma_na_factor.get_factored());
             /* mana_rpart is the loop constant */
-            for (factored<quantum_numbers, m_n_pair>& ma_na_entry : ma_na_entries) {
-                arma::colvec mana_rpart(basis_local.rPart_mem(ma_na_entry.factor.m_a, ma_na_entry.factor.n_a));
-                arma::colvec mbnb_rpart(arma::zeros(rVals.size()));
+            for (const factored<quantum_numbers, m_n_pair>& ma_na_entry : ma_na_entries) {
+                const arma::colvec mana_rpart(basis_local.rPart_mem(ma_na_entry.factor.m_a, ma_na_entry.factor.n_a));
+                arma::colvec mbnb_rpart(arma::zeros(rSize));
                 /* We could factor out the pair mb and nb but its useless */
-                for (quantum_numbers& e : ma_na_entry.factored_out) {
-                    mbnb_rpart += basis_local.rPart_mem(e.m_b, e.n_b)*rho(e.m_a, e.n_a, e.nz_a, e.m_b, e.n_b, e.nz_b)*e.count;
+                for (const quantum_numbers& e : ma_na_entry.factored_out) {
+                    mbnb_rpart += basis_local.rPart_mem(e.m_b, e.n_b)*(rho(e.m_a, e.n_a, e.nz_a, e.m_b, e.n_b, e.nz_b)*e.count);
                 }
                 all_rpart += mbnb_rpart%mana_rpart;
             }
@@ -162,12 +161,12 @@ arma::mat NuclearDensityCalculator::optimized_method3(const arma::vec& rVals, co
  *
  */
 NuclearDensityCalculator::NuclearDensityCalculator()
+        :basis(br, bz, N, Q)
 {
     imported_rho_values.load("src/rho.arma", arma::arma_ascii);
 #ifdef DEBUG
     std::cout << "[src/rho.arma defs imported]" << std::endl;
 #endif
-    basis = Basis(br, bz, N, Q);
     ind = arma::Cube<arma::sword>(basis.n_zMax.max(), basis.nMax.max(), basis.mMax);
     int i = 0;
     for (int m = 0; m<basis.mMax; m++) {
@@ -189,7 +188,7 @@ NuclearDensityCalculator::NuclearDensityCalculator()
  * @param n_zp
  * @return
  */
-inline double NuclearDensityCalculator::rho(int m, int n, int n_z, int mp, int np, int n_zp)
+inline double NuclearDensityCalculator::rho(int m, int n, int n_z, int mp, int np, int n_zp) const
 {
     return imported_rho_values.at(ind.at(n_z, n, m), ind.at(n_zp, np, mp));
 }

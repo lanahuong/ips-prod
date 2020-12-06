@@ -61,9 +61,9 @@ private:
 
     inline void exec_operation(const T& arg);
 
-    acc_function fun = nullptr;
+    const acc_function fun = nullptr;
     T result;
-    operation_type op = operation_type::Nop;
+    const operation_type op = operation_type::Nop;
     std::list<T> buffer{};
     volatile bool result_locked = false;
     volatile bool buffer_locked = false;

@@ -3,11 +3,8 @@
 #include "constants.h"
 
 Basis::Basis(double BR, double BZ, int N, double Q)
-        :br(BR), bz(BZ)
+        :br(BR), bz(BZ), mMax(calcMMax(N, Q)), nMax(calcNMax()), n_zMax(calcN_zMax(N, Q))
 {
-    this->mMax = calcMMax(N, Q);
-    this->nMax = calcNMax();
-    this->n_zMax = calcN_zMax(N, Q);
 }
 
 /**
