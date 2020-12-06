@@ -203,7 +203,7 @@ std::vector<factored<T, f>> FactorisationHelper<T, f>::get_vfactored() {
  * Specitic types and functions defined to fit our problem
  */
 typedef struct quantum_numbers {
-    int m_a, n_a, nz_a, m_b, n_b, nz_b;
+    int m_a, n_a, nz_a, m_b, n_b, nz_b, count;
 } quantum_numbers;
 
 typedef struct m_n_pair {
