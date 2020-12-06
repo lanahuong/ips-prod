@@ -1,5 +1,5 @@
 #include "NuclearDensityCalculator.h"
-#include "Chrono.h"
+#include "Chrono.hpp"
 #include "ThreadSafeAccumulator.hpp"
 #include <list>
 #include <memory>
