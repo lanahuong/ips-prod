@@ -16,7 +16,8 @@
 template<typename T, typename fa>
 struct factored {
   fa factor;
-  std::list<T> factored_out;
+  std::vector<T> factored_out;
+  //std::list<T> factored_out;
 };
 
 /**
@@ -44,6 +45,7 @@ public:
      * @param selector to select the values we want to factor out;
      */
     FactorisationHelper(std::list<T> input, selector_function selector, input_filter filter = [](T& a) { return true; });
+    FactorisationHelper(std::vector<T> input, selector_function selector, input_filter filter = [](T& a) { return true; });
 
     /**
      * Adds an entry to the factoriser
@@ -92,7 +94,8 @@ inline void FactorisationHelper<T, f>::dispatch_entry(T entry)
         it->factored_out.push_back(entry);
     }
     else {
-        out.push_back({fac, std::list<T>{entry}});
+        out.push_back({fac, std::vector<T>{entry}});
+    //    out.push_back({fac, std::list<T>{entry}});
     }
 }
 
@@ -117,6 +120,14 @@ FactorisationHelper<T, f>::FactorisationHelper(FactorisationHelper::selector_fun
  */
 template<typename T, typename f>
 FactorisationHelper<T, f>::FactorisationHelper(std::list<T> input, FactorisationHelper::selector_function select, FactorisationHelper::input_filter filt)
+        : FactorisationHelper<T, f>::FactorisationHelper(select, filt) {
+    for (auto &in : input) {
+        add(in);
+    }
+}
+
+template<typename T, typename f>
+FactorisationHelper<T, f>::FactorisationHelper(std::vector<T> input, FactorisationHelper::selector_function select, FactorisationHelper::input_filter filt)
         : FactorisationHelper<T, f>::FactorisationHelper(select, filt) {
     for (auto &in : input) {
         add(in);
