@@ -27,8 +27,7 @@ struct factored {
 template<typename T, typename f>
 class FactorisationHelper {
 public:
-    typedef bool(* input_filter)(T a);
-    typedef bool (* symetry_function)(T a, T b);
+    typedef bool(* input_filter)(T& a);
     typedef f (* selector_function)(T a);
 
     /**
@@ -36,7 +35,7 @@ public:
      * @param filter to filter some values out
      * @param selector to select the values we want to factor out;
      */
-    FactorisationHelper(selector_function selector, input_filter filter);
+    explicit FactorisationHelper(selector_function selector, input_filter filter = [](T& a) { return true; });
 
     /**
      * Constructor that imports a list of entries
@@ -44,7 +43,7 @@ public:
      * @param filter to filter some values out
      * @param selector to select the values we want to factor out;
      */
-    FactorisationHelper(std::list<T> input, selector_function selector, input_filter filter);
+    FactorisationHelper(std::list<T> input, selector_function selector, input_filter filter = [](T& a) { return true; });
 
     /**
      * Adds an entry to the factoriser
@@ -186,8 +185,20 @@ static inline bool nuclear_symetry(quantum_numbers a, quantum_numbers b) {
     return a.n_a == b.n_b && a.m_a == b.m_b && a.nz_a == b.nz_b && a.n_b == b.n_a && a.m_b == b.m_a && a.nz_b == b.nz_a;
 }
 
-static inline bool nuclear_filter(quantum_numbers entry) {
-    return entry.m_a == entry.m_b;
+static inline bool symmetry_filter(quantum_numbers& entry)
+{
+
+    if (entry.n_b<entry.n_a && entry.nz_b<entry.nz_a) {
+        entry.count *= 2;
+        return true;
+    }
+    else if (entry.n_b<=entry.n_a || entry.nz_b<=entry.nz_a) {
+        return true;
+    }
+    else {
+        return false;
+    }
+
 }
 
 static inline int select_nza(quantum_numbers entry)

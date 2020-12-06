@@ -16,6 +16,10 @@
  * which receives the values of zVals and rVals
  */
 class Basis {
+private:
+    double br{}; /**< Orthogonal deformation parameter */
+    double bz{}; /**< Z deformation parameter */
+
 public:
 
     const int mMax{}; /**< Holds the maximum quantum number m for the basis */
@@ -87,8 +91,6 @@ public:
     arma::mat basisFunc_mem(int m, int n, int nz);
 
 private:
-    double br{}; /**< Orthogonal deformation parameter */
-    double bz{}; /**< Z deformation parameter */
     Poly poly{}; /**< Polynomial class evaluator */
 
 
