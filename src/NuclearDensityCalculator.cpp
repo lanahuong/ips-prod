@@ -94,7 +94,7 @@ arma::mat NuclearDensityCalculator::optimized_method2(const arma::vec &rVals, co
 arma::mat NuclearDensityCalculator::optimized_method3(const arma::vec &rVals, const arma::vec &zVals) {
     Chrono local("optimized_method3");
     const int zSize(zVals.size()), rSize(rVals.size());
-    FactorisationHelper<struct quantum_numbers, int> nza_factor(select_nza);//, symmetry_filter); //TODO Enable the filter iff rSize > 50* zSize
+    FactorisationHelper<struct quantum_numbers, int> nza_factor(select_nza,  symmetry_filter); //TODO Enable the filter iff rSize > 50* zSize
     /* Rather than making things hard, let's just use the most naive method */
     for (int m_a(0), m_amax(basis.mMax); m_a < m_amax; m_a++) {
         for (int n_a(0), n_amax(basis.nMax(m_a)); n_a < n_amax; n_a++) {
@@ -113,11 +113,7 @@ arma::mat NuclearDensityCalculator::optimized_method3(const arma::vec &rVals, co
     const arma::colvec unit(rSize, arma::fill::ones);
     const std::vector<factored<quantum_numbers, int>> nza_entries(nza_factor.get_vfactored());
     const Basis basis_shared(br, bz, N, Q, rVals, zVals); /* Its easier if each thread has its own Basis class */
-#if __GNUC__ >= 10
-#pragma omp parallel for default(none) shared(nza_entries, builder, unit, basis_shared, zSize, rSize)
-#else
-#pragma omp parallel for default(none) shared(builder)
-#endif
+#pragma omp parallel for default(shared)
     /* nza_zpart is the loop constant */
     for (uint i = 0; i < nza_entries.size(); i++) {
         const factored<quantum_numbers, int> nza_entry(nza_entries[i]);
