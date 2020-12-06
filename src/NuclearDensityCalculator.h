@@ -28,7 +28,7 @@ private:
      * we dont know how to compute them.
      * @return
      */
-    double rho(int m, int n, int n_z, int mp, int np, int n_zp);
+    inline double rho(int m, int n, int n_z, int mp, int np, int n_zp);
 
 public:
 

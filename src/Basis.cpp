@@ -48,7 +48,7 @@ arma::mat Basis::basisFunc(int m, int n, int nz, const arma::vec& rVec, const ar
     return rPart(rVec, m, n).as_col()*zPart(zVec, nz).as_row();
 }
 
-arma::vec Basis::zPart(const arma::vec& zVec, int nz, bool use_mem)
+inline arma::vec Basis::zPart(const arma::vec& zVec, int nz, bool use_mem)
 {
     double const_factor = pow(bz, -0.5)*pow(PI, -0.25);
 
@@ -63,7 +63,7 @@ arma::vec Basis::zPart(const arma::vec& zVec, int nz, bool use_mem)
     return const_factor*exp%poly.hermite(nz);
 }
 
-arma::vec Basis::rPart(const arma::vec& rVec, int m, int n, bool use_mem)
+inline arma::vec Basis::rPart(const arma::vec& rVec, int m, int n, bool use_mem)
 {
     double const_factor = pow(br, -1)*pow(PI, -0.5);
 
@@ -94,7 +94,7 @@ arma::ivec Basis::calcNMax() const
 
 arma::imat Basis::calcN_zMax(int N, double Q)
 {
-    arma::imat tmp = arma::Mat<arma::sword>(mMax, nMax.at(0), arma::fill::zeros);
+    arma::imat tmp(mMax, nMax.at(0), arma::fill::zeros);
     for (int m = 0; m<mMax; m++) {
         for (int n = 0; n<nMax.at(m); n++) {
             tmp.at(m, n) = floor((N+2)*pow(Q, 2.0/3.0)+0.5-(m+2*n+1)*Q);
@@ -112,13 +112,13 @@ arma::mat Basis::basisFunc_mem(int m, int n, int nz)
  * Returns the value if it was alreadu computed else computes it and
  * saves it.
  */
-arma::vec Basis::zPart_mem(int nz)
+inline arma::vec Basis::zPart_mem(int nz)
 {
     if (computed_z_indices.at(nz)) {
         return computed_z_vals.at(nz);
     }
     else {
-        arma::vec tmp = zPart(zvec_mem, nz, true);
+        arma::vec tmp(zPart(zvec_mem, nz, true));
         computed_z_indices.at(nz) = true;
         computed_z_vals.at(nz) = tmp;
         return tmp;
@@ -128,13 +128,13 @@ arma::vec Basis::zPart_mem(int nz)
 /**
  * Returns the already computed value else computes it
  */
-arma::vec Basis::rPart_mem(int m, int n)
+inline arma::vec Basis::rPart_mem(int m, int n)
 {
     if (computed_r_indices.at(n*(mMax+1)+m)) {
         return computed_r_vals.at(n*(mMax+1)+m);
     }
     else {
-        arma::vec tmp = rPart(rvec_mem, m, n, true);
+        arma::vec tmp(rPart(rvec_mem, m, n, true));
         computed_r_indices.at(n*(mMax+1)+m) = true;
         computed_r_vals.at(n*(mMax+1)+m) = tmp;
         return tmp;

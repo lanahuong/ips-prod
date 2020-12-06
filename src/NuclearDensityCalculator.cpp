@@ -113,8 +113,7 @@ arma::mat NuclearDensityCalculator::optimized_method3(const arma::vec &rVals, co
     /* Thread safe accumulator to which we can send the results once we stop using openMP
      * Is has its own buffer when the acc is locked and a spinlock mechanism as the operations
      * are expected to be quite fast and not happen a lot */
-    std::shared_ptr<ThreadSafeAccumulator<arma::mat>> builder(
-            std::make_shared<ThreadSafeAccumulator<arma::mat>>(arma::zeros(rVals.size(), zVals.size()), operation_type::Add));
+    std::shared_ptr<ThreadSafeAccumulator<arma::mat>> builder(std::make_shared<ThreadSafeAccumulator<arma::mat>>(arma::zeros(rVals.size(), zVals.size()), operation_type::Add));
     arma::colvec unit(rVals.size(), arma::fill::ones);
     std::vector<factored<quantum_numbers, int>> nza_entries(nza_factor.get_vfactored());
     Basis basis_shared(br, bz, N, Q, rVals, zVals); /* Its easier if each thread has its own Basis class */
@@ -156,19 +155,16 @@ arma::mat NuclearDensityCalculator::optimized_method3(const arma::vec &rVals, co
  */
 NuclearDensityCalculator::NuclearDensityCalculator() {
     imported_rho_values.load("src/rho.arma", arma::arma_ascii);
-
 #ifdef DEBUG
     std::cout << "[src/rho.arma defs imported]" << std::endl;
 #endif
     basis = Basis(br, bz, N, Q);
-
     ind = arma::Cube<arma::sword>(basis.n_zMax.max(), basis.nMax.max(), basis.mMax);
     int i = 0;
     for (int m = 0; m < basis.mMax; m++) {
         for (int n = 0; n < basis.nMax.at(m); n++) {
             for (int n_z = 0; n_z < basis.n_zMax.at(m, n); n_z++) {
-                ind.at(n_z, n, m) = i;
-                i++;
+                ind.at(n_z, n, m) = i++;
             }
         }
     }
@@ -184,10 +180,8 @@ NuclearDensityCalculator::NuclearDensityCalculator() {
  * @param n_zp
  * @return
  */
-double NuclearDensityCalculator::rho(int m, int n, int n_z, int mp, int np, int n_zp) {
-    auto a = ind.at(n_z, n, m);
-    auto b = ind.at(n_zp, np, mp);
-    return imported_rho_values.at(a, b);
+inline double NuclearDensityCalculator::rho(int m, int n, int n_z, int mp, int np, int n_zp) {
+    return imported_rho_values.at(ind.at(n_z, n, m), ind.at(n_zp, np, mp));
 }
 
 /**

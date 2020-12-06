@@ -4,7 +4,7 @@ void Poly::calcHermite(uint nMax, const arma::vec &vec) {
     /**
      * If the parameters are nonsense the matrix (0) is returned
      */
-    arma::uword rowLen = vec.size();
+    arma::uword rowLen(vec.size());
     hermitePolynomial = arma::mat(nMax + 1, rowLen, arma::fill::zeros);
     hermitePolynomial.row(0) = arma::vec(rowLen, arma::fill::ones).t();
     if (nMax > 0) {
