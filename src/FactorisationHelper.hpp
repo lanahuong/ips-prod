@@ -28,7 +28,7 @@ template<typename T, typename f>
 class FactorisationHelper {
 public:
     typedef bool(* input_filter)(T& a);
-    typedef f (* selector_function)(T a);
+    typedef f (* selector_function)(const T& a);
 
     /**
      * Constructor of the factorisation helper.
@@ -135,20 +135,7 @@ template<typename T, typename f>
 std::list<struct factored<T, f>> FactorisationHelper<T, f>::get_factored()
 {
     remove_duplicates();
-    remove_symetric_elts();
     return out;
-}
-
-
-/**
- *
- * @tparam T
- * @tparam f
- */
-template<typename T, typename f>
-void FactorisationHelper<T, f>::remove_symetric_elts()
-{
-    //TODO ? But can have a huge negative impact of perfs
 }
 
 /**
@@ -181,13 +168,9 @@ typedef struct m_n_pair {
     int m_a, n_a;
 } m_n_pair;
 
-static inline bool nuclear_symetry(quantum_numbers a, quantum_numbers b) {
-    return a.n_a == b.n_b && a.m_a == b.m_b && a.nz_a == b.nz_b && a.n_b == b.n_a && a.m_b == b.m_a && a.nz_b == b.nz_a;
-}
 
 static inline bool symmetry_filter(quantum_numbers& entry)
 {
-
     if (entry.n_b<entry.n_a && entry.nz_b<entry.nz_a) {
         entry.count *= 2;
         return true;
@@ -198,26 +181,16 @@ static inline bool symmetry_filter(quantum_numbers& entry)
     else {
         return false;
     }
-
 }
 
-static inline int select_nza(quantum_numbers entry)
-{
-    return entry.nz_a;
-}
+static inline int select_nza(const quantum_numbers& entry) { return entry.nz_a; }
+// or we could use [](const quantum_numbers & q){return q.nz_a;}
 
-static inline int select_nzb(quantum_numbers entry) {
-    return entry.nz_b;
-}
 
-static inline struct m_n_pair select_ma_na(quantum_numbers entry) {
-    return {entry.m_a, entry.n_a};
-}
+static inline int select_nzb(const quantum_numbers& entry) { return entry.nz_b; }
 
-static inline bool operator==(const struct m_n_pair l, const struct m_n_pair r)
-{
-    return l.m_a==r.m_a && l.n_a==r.n_a;
-}
+static inline struct m_n_pair select_ma_na(const quantum_numbers& entry) { return {entry.m_a, entry.n_a}; }
 
+static inline bool operator==(const struct m_n_pair l, const struct m_n_pair r) { return l.m_a==r.m_a && l.n_a==r.n_a; }
 
 #endif //PROJET_IPS1_FACTORISATIONFINDER_H

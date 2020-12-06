@@ -100,11 +100,11 @@ arma::mat NuclearDensityCalculator::optimized_method3(const arma::vec& rVals, co
     const int zSize(zVals.size()), rSize(rVals.size());
     FactorisationHelper<struct quantum_numbers, int> nza_factor(select_nza, symmetry_filter);
     /* Rather than making things hard, let's just use the most naive method */
-    for (int m_a = 0; m_a<basis.mMax; m_a++) {
-        for (int n_a = 0; n_a<basis.nMax(m_a); n_a++) {
-            for (int nz_a = 0; nz_a<basis.n_zMax(m_a, n_a); nz_a++) {
-                for (int n_b = 0; n_b<basis.nMax(m_a); n_b++) {
-                    for (int nz_b = 0; nz_b<basis.n_zMax(m_a, n_b); nz_b++) {
+    for (int m_a(0), m_amax(basis.mMax); m_a<m_amax; m_a++) {
+        for (int n_a(0), n_amax(basis.nMax(m_a)); n_a<n_amax; n_a++) {
+            for (int nz_a(0), nz_amax(basis.n_zMax(m_a, n_a)); nz_a<nz_amax; nz_a++) {
+                for (int n_b(0), m_bmax(basis.nMax(m_a)); n_b<m_bmax; n_b++) {
+                    for (int nz_b(0), nz_bmax(basis.n_zMax(m_a, n_b)); nz_b<nz_bmax; nz_b++) {
                         nza_factor.add({m_a, n_a, nz_a, m_a, n_b, nz_b, 1});
                     }
                 }
