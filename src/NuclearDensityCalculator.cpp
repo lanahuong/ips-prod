@@ -2,7 +2,6 @@
 #include "Chrono.h"
 #include "ThreadSafeAccumulator.hpp"
 #include <list>
-#include <omp.h>
 #include <memory>
 
 #include "FactorisationHelper.hpp"
@@ -99,11 +98,9 @@ arma::mat NuclearDensityCalculator::optimized_method3(const arma::vec &rVals, co
     for (int m = 0; m < basis.mMax; m++) {
         for (int n = 0; n < basis.nMax(m); n++) {
             for (int n_z = 0; n_z < basis.n_zMax(m, n); n_z++) {
-                for (int mp = 0; mp < basis.mMax; mp++) {
-                    for (int np = 0; np < basis.nMax(mp); np++) {
-                        for (int n_zp = 0; n_zp < basis.n_zMax(mp, np); n_zp++) {
-                            nza_factor.add({m, n, n_z, mp, np, n_zp});
-                        }
+                for (int np = 0; np < basis.nMax(m); np++) {
+                    for (int n_zp = 0; n_zp < basis.n_zMax(m, np); n_zp++) {
+                        nza_factor.add({m, n, n_z, m, np, n_zp});
                     }
                 }
             }
