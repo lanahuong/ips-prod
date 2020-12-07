@@ -97,10 +97,8 @@ arma::mat NuclearDensityCalculator::optimized_method2(const arma::vec& rVals, co
 arma::mat NuclearDensityCalculator::optimized_method3(const arma::vec& rVals, const arma::vec& zVals)
 {
     Chrono local("optimized_method3");
-    const int zSize(zVals.size()), rSize(rVals.size());
     FactorisationHelper<struct quantum_numbers, int> nza_factored_sum(select_nza, symmetry_filter);
-    /* Rather than making things hard, let's just use the most naive method */
-    for (int m_a(0), m_amax(basis.mMax); m_a<m_amax; m_a++) {
+    for (int m_a(0), m_amax(basis.mMax); m_a<m_amax; m_a++) {  /* Rather than making things hard, let's just use the most naive method */
         for (int n_a(0), n_amax(basis.nMax(m_a)); n_a<n_amax; n_a++) {
             for (int nz_a(0), nz_amax(basis.n_zMax(m_a, n_a)); nz_a<nz_amax; nz_a++) {
                 for (int n_b(0), m_bmax(basis.nMax(m_a)); n_b<m_bmax; n_b++) {
@@ -111,31 +109,31 @@ arma::mat NuclearDensityCalculator::optimized_method3(const arma::vec& rVals, co
             }
         }
     }
-    /* Thread safe accumulator to which we can send the results once we stop using openMP Is has its own buffer when the acc
-     * is locked and a spinlock mechanism as the operation are expected to be quite fast and not happen a lot */
-    std::shared_ptr<ThreadSafeAccumulator<arma::mat>> builder(std::make_shared<ThreadSafeAccumulator<arma::mat>>(arma::zeros(rSize, zSize), operation_type::Add));
+
+    const int zSize(zVals.size()), rSize(rVals.size());
+    std::shared_ptr<ThreadSafeAccumulator<arma::mat>> builder(std::make_shared<ThreadSafeAccumulator<arma::mat >>(arma::zeros(rSize, zSize), operation_type::Add));
     const arma::colvec unit(rSize, arma::fill::ones);
-    const Basis basis_shared(br, bz, N, Q, rVals, zVals); /* Its easier if each thread has its own Basis class */
-#pragma omp parallel for default(shared)
+    const Basis basis_mem(br, bz, N, Q, rVals, zVals);
     /* nza_zpart is the loop constant */
-    for (auto it = nza_factored_sum.begin(); it!=nza_factored_sum.end(); it++) {
-        Basis basis_local(basis_shared); /* We copy the basis in each thread, strangely the private openMP dont work */
-        const arma::rowvec nza_zpart(basis_local.zPart_mem(it->factor).as_row());
+#pragma omp parallel for default(shared)
+    for (size_t i = 0; i<nza_factored_sum.size(); i++) {
+        Basis basis_local(basis_mem); /* We copy the basis in each thread, strangely the private openMP dont work */
+        const arma::rowvec nza_zpart(basis_local.zPart_mem(nza_factored_sum[i].factor).as_row());
         arma::mat tmp(arma::zeros(rSize, zSize));
         /* We factor out nzb of the sum left to compute */
-        FactorisationHelper<quantum_numbers, int> nzb_Factor(it->factored_out, select_nzb);
+        FactorisationHelper<quantum_numbers, int> nzb_factored(nza_factored_sum[i].factored_out, select_nzb);
         /* nzb_zpart is the loop constant */
-        for (factored<quantum_numbers, int>& nzb_entry : nzb_Factor) {
-            const arma::rowvec nzb_zpart(basis_local.zPart_mem(nzb_entry.factor).as_row());
+        for (factored<quantum_numbers, int>& nzb_term : nzb_factored) {
+            const arma::rowvec nzb_zpart(basis_local.zPart_mem(nzb_term.factor).as_row());
             arma::colvec all_rpart(arma::zeros(rSize));
             /* We factor out the pair ma na of the sum that is left to compute */
-            FactorisationHelper<quantum_numbers, m_n_pair> ma_na_factor(nzb_entry.factored_out, select_ma_na);
-            for (const factored<quantum_numbers, m_n_pair>& ma_na_entry : ma_na_factor) {
+            FactorisationHelper<quantum_numbers, m_n_pair> mana_factored(nzb_term.factored_out, select_mana);
+            for (const factored<quantum_numbers, m_n_pair>& mana_term : mana_factored) {
                 /* mana_rpart is the loop constant */
-                const arma::colvec mana_rpart(basis_local.rPart_mem(ma_na_entry.factor.m_a, ma_na_entry.factor.n_a));
+                const arma::colvec mana_rpart(basis_local.rPart_mem(mana_term.factor.m_a, mana_term.factor.n_a));
                 arma::colvec mbnb_rpart(arma::zeros(rSize));
                 /* We could factor out the pair mb and nb but its useless */
-                for (const quantum_numbers e : ma_na_entry.factored_out) {
+                for (const quantum_numbers e : mana_term.factored_out) {
                     mbnb_rpart += basis_local.rPart_mem(e.m_b, e.n_b)*(rho(e.m_a, e.n_a, e.nz_a, e.m_b, e.n_b, e.nz_b)*e.count);
                 }
                 all_rpart += mbnb_rpart%mana_rpart;

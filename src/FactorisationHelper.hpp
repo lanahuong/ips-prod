@@ -115,14 +115,14 @@ inline void FactorisationHelper<T, f>::dispatch_entry(const T& entry)
  * @param filt
  */
 template<typename T, typename f>
-FactorisationHelper<T, f>::FactorisationHelper(FactorisationHelper::selector_function selec, FactorisationHelper::input_filter filt)
+FactorisationHelper<T, f>::FactorisationHelper(selector_function selec, input_filter filt)
         :filter(filt), selector(selec)
 {
     out.reserve(500);
 }
 
 template<typename T, typename f>
-FactorisationHelper<T, f>::FactorisationHelper(std::vector<T>& input, FactorisationHelper::selector_function select, FactorisationHelper::input_filter filt)
+FactorisationHelper<T, f>::FactorisationHelper(std::vector<T>& input, selector_function select, input_filter filt)
         : FactorisationHelper<T, f>::FactorisationHelper(select, filt)
 {
     out.reserve(10+input.size()/5);
@@ -140,7 +140,6 @@ inline void FactorisationHelper<T, f>::add(T&& entry)
         dispatch_entry(entry);
     }
 }
-
 
 /**
  * Specitic types and functions defined to fit our problem
@@ -172,7 +171,7 @@ static inline int select_nza(const quantum_numbers& entry) { return entry.nz_a; 
 
 static inline int select_nzb(const quantum_numbers& entry) { return entry.nz_b; }
 
-static inline struct m_n_pair select_ma_na(const quantum_numbers& entry) { return {entry.m_a, entry.n_a}; }
+static inline struct m_n_pair select_mana(const quantum_numbers& entry) { return {entry.m_a, entry.n_a}; }
 
 static inline bool operator==(const struct m_n_pair l, const struct m_n_pair r) { return l.m_a==r.m_a && l.n_a==r.n_a; }
 
