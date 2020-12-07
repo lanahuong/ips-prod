@@ -17,16 +17,16 @@ Basis::Basis(double BR, double BZ, int N, double Q, const arma::vec& rVals, cons
         :Basis(BR, BZ, N, Q)
 {
     rvec_mem = rVals;
-    squared_rarg_mem = arma::square(rVals/br);
-    rexp_mem = arma::exp(-squared_rarg_mem/2.0);
+    rexp_mem = arma::exp(-arma::square(rVals/br)/2.0);
     computed_r_vals = std::vector<arma::vec>((mMax+1)*(nMax.max()+1));
     computed_r_indices = std::vector<bool>((mMax+1)*(nMax.max()+1), false);
+    poly_mem.calcLaguerre(mMax, nMax.max(), arma::square(rVals/br));
 
     zvec_mem = zVals;
-    squared_zarg_mem = arma::square(zVals/bz);
-    zexp_mem = arma::exp(-squared_zarg_mem/2.0);
+    zexp_mem = arma::exp(-arma::square(zVals/bz)/2.0);
     computed_z_vals = std::vector<arma::vec>(n_zMax.max());
     computed_z_indices = std::vector<bool>(n_zMax.max(), false);
+    poly_mem.calcHermite(n_zMax.max(), zVals/bz);
 
     is_mem = true;
 }
@@ -53,10 +53,13 @@ arma::vec Basis::zPart(const arma::vec& zVec, int nz, bool use_mem)
         const_factor *= pow(2*i, -0.5);
     }
 
-    arma::vec squared_arg = use_mem ? squared_zarg_mem : arma::square(zVec/bz);
-    arma::vec exp = use_mem ? zexp_mem : arma::exp(-squared_arg/2.0);
-    poly.calcHermite(nz+1, zVec/bz);
+    if (use_mem) {
+        return const_factor*zexp_mem%poly_mem.hermite(nz);
+    }
 
+    arma::vec squared_arg = arma::square(zVec/bz);
+    arma::vec exp = arma::exp(-squared_arg/2.0);
+    poly.calcHermite(nz+1, zVec/bz);
     return const_factor*exp%poly.hermite(nz);
 }
 
@@ -68,11 +71,14 @@ arma::vec Basis::rPart(const arma::vec& rVec, int m, int n, bool use_mem)
         const_factor *= pow(i, -0.5);
     }
 
-    arma::vec squared_arg = use_mem ? squared_rarg_mem : arma::square(rVec/br);
-    arma::vec exp = use_mem ? rexp_mem : arma::exp(-squared_arg/2.0);
     arma::vec pow = arma::pow(rVec/br, m);
-    poly.calcLaguerre(m+1, n+1, squared_arg);
+    if (use_mem) {
+        return const_factor*rexp_mem%pow%poly_mem.laguerre(m, n);
+    }
 
+    arma::vec squared_arg = arma::square(rVec/br);
+    arma::vec exp = arma::exp(-squared_arg/2.0);
+    poly.calcLaguerre(m+1, n+1, squared_arg);
     return const_factor*exp%pow%poly.laguerre(m, n);
 }
 
@@ -111,13 +117,13 @@ arma::mat Basis::basisFunc_mem(int m, int n, int nz)
  */
 arma::vec Basis::zPart_mem(int nz)
 {
-    if (computed_z_indices.at(nz)) {
-        return computed_z_vals.at(nz);
+    if (computed_z_indices[nz]) {
+        return computed_z_vals[nz];
     }
     else {
-        arma::vec tmp(zPart(zvec_mem, nz, true));
-        computed_z_indices.at(nz) = true;
-        computed_z_vals.at(nz) = tmp;
+        arma::vec tmp(zPart(zvec_mem, nz, is_mem));
+        computed_z_indices[nz] = true;
+        computed_z_vals[nz] = tmp;
         return tmp;
     }
 }
@@ -127,13 +133,13 @@ arma::vec Basis::zPart_mem(int nz)
  */
 arma::vec Basis::rPart_mem(int m, int n)
 {
-    if (computed_r_indices.at(n*(mMax+1)+m)) {
-        return computed_r_vals.at(n*(mMax+1)+m);
+    if (computed_r_indices[n*(mMax+1)+m]) {
+        return computed_r_vals[n*(mMax+1)+m];
     }
     else {
-        arma::vec tmp(rPart(rvec_mem, m, n, true));
-        computed_r_indices.at(n*(mMax+1)+m) = true;
-        computed_r_vals.at(n*(mMax+1)+m) = tmp;
+        arma::vec tmp(rPart(rvec_mem, m, n, is_mem));
+        computed_r_indices[n*(mMax+1)+m] = true;
+        computed_r_vals[n*(mMax+1)+m] = tmp;
         return tmp;
     }
 }

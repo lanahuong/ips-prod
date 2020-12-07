@@ -91,20 +91,18 @@ public:
     arma::mat basisFunc_mem(int m, int n, int nz);
 
 private:
-    Poly poly{}; /**< Polynomial class evaluator */
-
+    Poly poly; /**< Polynomial class evaluator */
 
     bool is_mem = false; /**< Is set to true if the rVec and zVec were given at construction -> memoisation  */
     arma::vec rvec_mem;/**< rVec given in the constructor */
     arma::vec zvec_mem;/**< zVec given in the constructor */
-    arma::vec squared_rarg_mem{};/**< pre-computed vector if is_mem */
-    arma::vec squared_zarg_mem{};/**< pre-computed vector if is_mem */
     arma::vec zexp_mem{};/**< pre-computed vector if is_mem */
     arma::vec rexp_mem{};/**< pre-computed vector if is_mem */
     std::vector<bool> computed_z_indices;/**< computed indices if is_mem */
     std::vector<arma::vec> computed_z_vals;/**< stored zVals if is_mem */
     std::vector<bool> computed_r_indices;/**< computed indices if is_mem */
     std::vector<arma::vec> computed_r_vals;/**< stored rVals if is_mem */
+    Poly poly_mem;
 
     /**
      * Given the definition and nMax being >=0 , if Q is null the sup is not defined

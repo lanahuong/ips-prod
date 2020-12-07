@@ -5,6 +5,12 @@
 #ifndef PROJET_IPS1_FACTORISATIONFINDER_H
 #define PROJET_IPS1_FACTORISATIONFINDER_H
 
+
+#ifndef likely
+#define likely(x) __builtin_expect((x), 1)
+#endif
+
+
 #include <list>
 #include <algorithm>
 
@@ -127,7 +133,7 @@ FactorisationHelper<T, f>::FactorisationHelper(std::vector<T>& input, selector_f
 {
     out.reserve(10+input.size()/5);
     for (auto& in : input) {
-        if (filter(in)) {
+        if (likely(filter(in))) {
             dispatch_entry(std::move(in));
         }
     }
@@ -136,7 +142,7 @@ FactorisationHelper<T, f>::FactorisationHelper(std::vector<T>& input, selector_f
 template<typename T, typename f>
 inline void FactorisationHelper<T, f>::add(T&& entry)
 {
-    if (filter(entry)) {
+    if (likely(filter(entry))) {
         dispatch_entry(entry);
     }
 }
