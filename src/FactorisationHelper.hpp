@@ -11,7 +11,8 @@
 #endif
 
 
-#include <list>
+#include <vector>
+#include <deque>
 #include <algorithm>
 
 /**
@@ -72,16 +73,16 @@ public:
 
     inline factored<T, f>& operator[](int index) { return out[index]; };
 
-    inline typename std::vector<struct factored<T, f>>::iterator begin() { return out.begin(); };
+    inline typename std::deque<struct factored<T, f>>::iterator begin() { return out.begin(); };
 
-    inline typename std::vector<struct factored<T, f>>::iterator end() { return out.end(); };
+    inline typename std::deque<struct factored<T, f>>::iterator end() { return out.end(); };
 
     inline size_t size() { return out.size(); };
 
 private:
     const input_filter filter;
     const selector_function selector;
-    std::vector<struct factored<T, f>> out{};
+    std::deque<struct factored<T, f>> out{};
 
     /**
      * As we add entries, they are placed in the right categories
@@ -106,10 +107,10 @@ inline void FactorisationHelper<T, f>::dispatch_entry(const T& entry)
     f fac = selector(entry);
     auto it = std::find_if(out.begin(), out.end(), [&fac](const struct factored<T, f>& x) { return x.factor==fac; });
     if (it!=out.end()) {
-        it->factored_out.push_back(std::move(entry));
+        it->factored_out.emplace_back(std::move(entry));
     }
     else {
-        out.push_back({fac, std::vector<T>{std::move(entry)}});
+        out.emplace_back(fac, std::vector<T>{std::move(entry)});
     }
 }
 
@@ -124,14 +125,14 @@ template<typename T, typename f>
 FactorisationHelper<T, f>::FactorisationHelper(selector_function selec, input_filter filt)
         :filter(filt), selector(selec)
 {
-    out.reserve(500);
+   // out.reserve(500);
 }
 
 template<typename T, typename f>
 FactorisationHelper<T, f>::FactorisationHelper(std::vector<T>& input, selector_function select, input_filter filt)
         : FactorisationHelper<T, f>::FactorisationHelper(select, filt)
 {
-    out.reserve(10+input.size()/5);
+//    out.reserve(10+input.size()/5);
     for (auto& in : input) {
         if (likely(filter(in))) {
             dispatch_entry(std::move(in));
