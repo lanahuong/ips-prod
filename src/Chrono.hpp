@@ -7,7 +7,7 @@ class Chrono {
 public:
     inline Chrono();
 
-    inline explicit Chrono(std::string caller_name);
+    inline explicit Chrono(const std::string&& caller_name);
 
     inline Chrono(const Chrono&) = delete;
 
@@ -43,7 +43,7 @@ inline Chrono::~Chrono()
     }
 }
 
-inline Chrono::Chrono(std::string caller_name)
+inline Chrono::Chrono(const std::string &&caller_name)
         :Chrono()
 {
     caller = std::move(caller_name);

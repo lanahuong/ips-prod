@@ -17,11 +17,11 @@ void Poly::calcHermite(uint nMax, const arma::vec &vec) {
     }
 }
 
-arma::vec Poly::hermite(int n) {
+arma::vec Poly::hermite(int n)const {
     return hermitePolynomial.row(n).as_col();
 }
 
-arma::vec Poly::laguerre(int m, int n) {
+arma::vec  Poly::laguerre(int m, int n)const {
     return laguerrePolynomial.slice(n).row(m).as_col();
 }
 

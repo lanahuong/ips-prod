@@ -91,6 +91,7 @@ inline void ThreadSafeAccumulator<T>::push(const T& arg)
 {
     if (result_locked) {
         acquire_buffer_lock();
+     //   std::cout << "buffering " << std::endl;
         buffer.push_back(arg);
         release_buffer_lock();
     }

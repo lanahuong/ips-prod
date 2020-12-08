@@ -17,8 +17,8 @@
  */
 class Basis {
 private:
-    double br{}; /**< Orthogonal deformation parameter */
-    double bz{}; /**< Z deformation parameter */
+    const double br{}; /**< Orthogonal deformation parameter */
+    const double bz{}; /**< Z deformation parameter */
 
 public:
 
