@@ -8,7 +8,7 @@
 #include <armadillo>
 #include <vector>
 
-#include "../src/SolverSchrodinger.h"
+#include "SolverSchrodinger.h"
 #include "../src/constants.h"
 
 /**

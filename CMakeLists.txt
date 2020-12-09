@@ -15,10 +15,7 @@ include_directories(${ARMADILLO_INCLUDE_DIRS})
 add_executable(main
         src/Poly.cpp src/Poly.h
         src/main.cpp
-        src/SolverSchrodinger.cpp src/SolverSchrodinger.h
-        src/Derivator.cpp src/Derivator.h
         src/Basis.h
-        src/OrthogonalityChecker.cpp src/OrthogonalityChecker.h
         src/savers/Saver.cpp src/savers/Saver.h
         src/constants.h
         src/Basis.cpp src/savers/3Dsavers.cpp src/savers/3Dsavers.h
@@ -28,11 +25,10 @@ target_link_libraries(main ${ARMADILLO_LIBRARIES})
 target_compile_options(main ${COMPILE_OPTIONS})
 
 #TESTS
-add_executable(tests src/Poly.cpp src/Basis.cpp src/Poly.h src/SolverSchrodinger.cpp
-        src/SolverSchrodinger.h src/Derivator.cpp src/Derivator.h src/Basis.h src/OrthogonalityChecker.cpp src/OrthogonalityChecker.h
+add_executable(tests src/Poly.cpp src/Basis.cpp src/Poly.h src/Basis.h
         src/savers/Saver.cpp src/savers/Saver.h src/constants.h
         src/NuclearDensityCalculator.cpp src/NuclearDensityCalculator.h
-        tests/testsDerivator.cpp tests/testsMandatory.cpp
+        tests/testsMandatory.cpp
         tests/testsNuclearDensityCalculator.cpp src/Chrono.hpp src/ThreadSafeAccumulator.hpp src/FactorisationHelper.hpp)
 target_link_libraries(tests ${ARMADILLO_LIBRARIES})
 target_compile_options(tests ${COMPILE_OPTIONS})

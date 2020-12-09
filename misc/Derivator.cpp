@@ -1,6 +1,6 @@
 #include "Derivator.h"
 #include <armadillo>
-#include "constants.h"
+#include "../src/constants.h"
 
 void Derivator::differentiateTwice(arma::mat &m)
 {

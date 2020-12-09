@@ -1,7 +1,7 @@
 #include "SolverSchrodinger.h"
 #include "Derivator.h"
-#include "constants.h"
-#include "Poly.h"
+#include "../src/constants.h"
+#include "../src/Poly.h"
 
 /**
  * @param zmin minimum z where to compute the function
