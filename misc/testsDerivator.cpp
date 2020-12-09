@@ -6,7 +6,7 @@
 
 #include <gtest/gtest.h>
 
-#include "../src/Derivator.h"
+#include "Derivator.h"
 #include "../src/constants.h"
 
 using namespace arma;

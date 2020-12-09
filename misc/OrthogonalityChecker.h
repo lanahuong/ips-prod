@@ -7,9 +7,9 @@
 #define PROJET_IPS1_ORTHOGONALITYCHECKER_H
 
 #include <armadillo>
-#include "constants.h"
+#include "../src/constants.h"
 #include "hermiteCoefs.h"
-#include "Poly.h"
+#include "../src/Poly.h"
 #include "SolverSchrodinger.h"
 
 /**

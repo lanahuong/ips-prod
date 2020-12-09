@@ -1,9 +1,9 @@
+#include <vector>
+#include <memory>
+
 #include "NuclearDensityCalculator.h"
 #include "Chrono.hpp"
 #include "ThreadSafeAccumulator.hpp"
-#include <list>
-#include <memory>
-
 #include "FactorisationHelper.hpp"
 
 

@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "../src/OrthogonalityChecker.h"
+#include "OrthogonalityChecker.h"
 
 struct orthoSolutionCheckAllPairs {
     int nMaxIndex;
