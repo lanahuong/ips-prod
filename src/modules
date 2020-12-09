@@ -1,4 +1,5 @@
-MODULES += Hermite SolverSchrodinger Derivator OrthogonalityChecker Saver
+MODULES += Basis Poly NuclearDensityCalculator
 MAIN = main
-ORPHANED_HEADERS = hermiteCoefs constants
+ORPHANED_HEADERS = constants
 
+include src/savers/modules

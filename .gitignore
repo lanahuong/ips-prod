@@ -1,5 +1,16 @@
 bin
-obj
-tmp
+
+
 /cmake-build-debug/
 /cmake-build-debug-coverage/
+Supprimerait .DS_Store
+Supprimerait .idea/.gitignore
+Supprimerait .idea/.name
+Supprimerait .idea/inspectionProfiles/
+Supprimerait .idea/ips-prod.iml
+Supprimerait .idea/misc.xml
+Supprimerait .idea/modules.xml
+Supprimerait .idea/vcs.xml
+Supprimerait doc/.DS_Store
+Supprimerait OrthogonalityChecker-605bf9f1.o.tmp
+

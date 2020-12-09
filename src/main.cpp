@@ -1,36 +1,26 @@
 #include "main.h"
-
+#include "NuclearDensityCalculator.h"
+#include "savers/3Dsavers.h"
+#include "Chrono.hpp"
 
 using namespace std;
 
+
 int main()
 {
-  double bound = 7;
-  uint n = 3;
-  arma::mat m = SolverSchrodinger::solve1D(-bound, bound, n);
 
-#ifdef DEBUG
-  m.print("The Matrix");
-  auto *checker = new OrthogonalityChecker();
-  for (uint i = 0; i < HERM_QUADRA_N_MAX; i++)
-    {
-      for (uint j = 0; j < HERM_QUADRA_N_MAX; j++)
-        {
-          cout << "params: " << i << " " << j << "res: " << checker->checkFor(i, j) << '\n';
-        }
-    }
-  delete checker;
-#endif
-  arma::rowvec z = arma::regspace(-bound, STEP, bound).as_row();
-#ifdef DEBUG
-  bool test = SolverSchrodinger::test1DSolution(z, m);
-  cout << to_string(test);
-  if {!test}{
-    return 1;
-  }
-#endif
-  Saver::saveToCSV(z, m);
-  cout << "file saved!" << endl;
+    NuclearDensityCalculator nuclearDensityCalculator;
+    int r_bound = 10;
+    double r_step = 01;
+    int r_len = 2*r_bound/r_step+1;
+    int z_bound = 20;
+    double z_step = 02;
+    int z_len = 2*z_bound/z_step+1;
 
-  return 0;
+
+    //arma::mat res = nuclearDensityCalculator.naive_method(arma::regspace(-r_bound, r_step, r_bound), arma::regspace(-z_bound, z_step, z_bound));
+    Chrono c("main");
+    for (int i = 0; i<1000; i++) arma::mat res = nuclearDensityCalculator.optimized_method3(arma::regspace(-r_bound, r_step, r_bound), arma::regspace(-z_bound, z_step, z_bound));
+
+    return 0;
 }

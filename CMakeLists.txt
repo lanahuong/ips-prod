@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.13)
 project(projet_ips1)
 set(CMAKE_CXX_STANDARD 11)
-set(COMPILE_OPTIONS PRIVATE -Wall -Wextra) #)-Werror -pedantic -ansi -Wshadow -Wdouble-promotion -Wundef -fno-common -Wconversion -Wunused-parameter)
+set(COMPILE_OPTIONS PRIVATE -pedantic -ansi -Wshadow -Wdouble-promotion -Wundef -fno-common  -Wunused-parameter -Winit-self -Wuninitialized -Wmissing-declarations -Woverloaded-virtual -Wold-style-cast )
+#-Wconversion
+
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -march=native -mtune=native -fopenmp -Ofast -flto")
 
 #Armadillo
 find_package(Armadillo REQUIRED)
@@ -9,13 +12,24 @@ include_directories(${ARMADILLO_INCLUDE_DIRS})
 
 
 #MAIN
-add_executable(main src/Hermite.cpp src/main.cpp src/SolverSchrodinger.cpp src/Derivator.cpp src/OrthogonalityChecker.cpp src/Saver.cpp)
+add_executable(main
+        src/Poly.cpp src/Poly.h
+        src/main.cpp
+        src/Basis.h
+        src/savers/Saver.cpp src/savers/Saver.h
+        src/constants.h
+        src/Basis.cpp src/savers/3Dsavers.cpp src/savers/3Dsavers.h
+        src/NuclearDensityCalculator.cpp src/NuclearDensityCalculator.h
+        src/Chrono.hpp src/ThreadSafeAccumulator.hpp src/FactorisationHelper.hpp)
 target_link_libraries(main ${ARMADILLO_LIBRARIES})
 target_compile_options(main ${COMPILE_OPTIONS})
 
 #TESTS
-add_executable(tests src/Hermite.cpp src/OrthogonalityChecker.cpp src/SolverSchrodinger.cpp src/Derivator.cpp
-        tests/testsHermite.cpp tests/testsSolverSchrodinger.cpp tests/testsOrthogonalityChecker.cpp tests/testsDerivator.cpp)
+add_executable(tests src/Poly.cpp src/Basis.cpp src/Poly.h src/Basis.h
+        src/savers/Saver.cpp src/savers/Saver.h src/constants.h
+        src/NuclearDensityCalculator.cpp src/NuclearDensityCalculator.h
+        tests/testsMandatory.cpp
+        tests/testsNuclearDensityCalculator.cpp src/Chrono.hpp src/ThreadSafeAccumulator.hpp src/FactorisationHelper.hpp)
 target_link_libraries(tests ${ARMADILLO_LIBRARIES})
 target_compile_options(tests ${COMPILE_OPTIONS})
 target_link_libraries(tests gtest_main)

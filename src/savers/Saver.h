@@ -12,7 +12,6 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include "Hermite.h"
 
 /**
  * @class Saver
@@ -24,7 +23,7 @@ class Saver {
   /**
    * @brief Save functions \a f to CSV
    */
-  static void saveToCSV(arma::rowvec, arma::mat);
+  static void saveToCSV(const arma::rowvec&, const arma::mat&);
 };
 
 #endif // !SAVER_H
