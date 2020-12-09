@@ -10,6 +10,6 @@
 #define MASS 1.0 ///< The mass
 #define OMEGA 1.0 ///< Angular momentum
 #define STEP 0.01 ///< The step used in arma::regspace
-#define PI 3.141592653589793238462643383279502884L ///< Real value needed to normalize the scalar product else the kroneckers wont be equals to 1
+#define PI 3.141592653589793238462643383279502884 ///< Real value needed to normalize the scalar product else the kroneckers wont be equals to 1
 
 #endif

@@ -48,6 +48,23 @@ arma::mat* NuclearDensityTest::res = nullptr;
 arma::vec* NuclearDensityTest::rVals = nullptr;
 arma::vec* NuclearDensityTest::zVals = nullptr;
 
+
+TEST_F(NuclearDensityTest, optimized_method1) {
+    arma::mat opti = ndc->optimized_method1(*rVals, *zVals);
+    ASSERT_NEAR(arma::norm(opti - *res), 0.0, 1e-08);
+}
+
+TEST_F(NuclearDensityTest, optimized_method2) {
+    arma::mat opti = ndc->optimized_method2(*rVals, *zVals);
+    ASSERT_NEAR(arma::norm(opti - *res), 0.0, 1e-08);
+}
+
+TEST_F(NuclearDensityTest, optimized_method3) {
+    arma::mat opti = ndc->optimized_method3(*rVals, *zVals);
+    ASSERT_NEAR(arma::norm(opti - *res), 0.0, 1e-08);
+}
+
+
 /**
  * structure of points to test the density calculation
 */

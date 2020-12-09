@@ -42,7 +42,7 @@ public:
      * @brief Get the Hermite polynomial previously computed of rank n-1
      * @param n the rank of the polynomial to get
      */
-    arma::vec hermite(int n);
+    arma::vec hermite(int n)const ;
 
     /**
     * @brief Iteratively evaluate the Laguerre polynomial on a vector
@@ -57,7 +57,7 @@ public:
      * @param m the m parameter of the polynomial to get
      * @param n the n parameter of the polynomial to get
      */
-    arma::vec laguerre(int m, int n);
+    arma::vec laguerre(int m, int n)const;
 };
 
 #endif // POLY_H!
