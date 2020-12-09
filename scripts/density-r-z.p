@@ -22,4 +22,4 @@ set ylabel "r (fm)"
 set tics nomirror out scale 1
 
 # Plot the density matrix
-plot "tmp/density_z_r.csv" matrix u (40*($1-32)/63):(20*($2-16)/31):3 with image notitle
+plot "tmp/density-r-z.csv" matrix u (40*($1-32)/63):(20*($2-16)/31):3 with image notitle

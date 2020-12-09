@@ -8,6 +8,5 @@
 #define MAIN_H
 
 #include <iostream>
-#include "savers/Saver.h"
 
 #endif // !MAIN_H

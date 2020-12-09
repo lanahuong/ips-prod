@@ -187,7 +187,7 @@ pigment { checker
 // isosurface
 #declare F=function{
 pattern{
-density_file df3 "example.df3"
+density_file df3 "tmp/density-r-z.df3"
 
 #if (INTERPOLATE=0)
   interpolate 0
@@ -236,7 +236,7 @@ box
    intervals 10
    density
    {
-    density_file df3 "example.df3"
+    density_file df3 "tmp/density-r-z.df3"
 
 #if (INTERPOLATE=0)
   interpolate 0
