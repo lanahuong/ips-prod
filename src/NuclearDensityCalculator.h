@@ -55,12 +55,12 @@ public:
      * @param zVals
      * @return a matrix
      */
-    arma::mat naive_method(const arma::vec& rVals, const arma::vec& zVals);
+    arma::mat naive_method(const arma::vec& rVals, const arma::vec& zVals) ;
 
     /**
      * Optimized method 1
      */
-    arma::mat optimized_method1(const arma::vec& rVals, const arma::vec& zVals);
+    arma::mat optimized_method1(const arma::vec& rVals, const arma::vec& zVals) ;
 
     /**
      * Manually trying to factor out some values, but doesnt really work in a clean manner
@@ -74,7 +74,7 @@ public:
 
     /**
      * Most optimized method.
-     * It uses the memoised version of the @class Basis.
+     * It uses the memoised version of the class Basis.
      * It uses multithreading with openMP but can be ported to use native threads
      * It uses the factorisation helper to extract the four sub_sums from the
      * naive one.
@@ -82,7 +82,7 @@ public:
      * @param zVals
      * @return
      */
-    arma::mat optimized_method3(const arma::vec& rVals, const arma::vec& zVals);
+    arma::mat optimized_method3(const arma::vec& rVals, const arma::vec& zVals) const;
 
     /**
     * @brief Convert the density form cylindric to cartesian coordinates
@@ -92,7 +92,7 @@ public:
     * @param res the matrix of density values in cylindric coordinates
     * @return a cube containing the density in cartesian coordinates
     */
-    arma::cube density_cartesian(const int xyPoints, const int zPoints, const arma::vec rVals, const arma::mat res);
+    arma::cube static density_cartesian(int xyPoints, int zPoints, const arma::vec& rVals, const arma::mat& res) ;
 };
 
 #endif //PROJET_IPS1_NUCLEARDENSITYCALCULATOR_H

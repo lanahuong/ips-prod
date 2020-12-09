@@ -25,7 +25,12 @@ class Saver {
    */
   static void saveToCSV(const arma::mat&, std::string);
 
-  static void cubeToDf3(const arma::cube &m, std::string filename);
+  /**
+   *
+   * @param m
+   * @param filename
+   */
+  static void cubeToDf3(const arma::cube &m, const std::string& filename);
 };
 
 #endif // !SAVER_H

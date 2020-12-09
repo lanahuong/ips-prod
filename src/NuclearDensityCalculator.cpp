@@ -7,12 +7,6 @@
 #include "FactorisationHelper.hpp"
 
 
-/**
- *
- * @param rVals
- * @param zVals
- * @return
- */
 arma::mat NuclearDensityCalculator::naive_method(const arma::vec& rVals, const arma::vec& zVals)
 {
     Chrono local("naive_method");
@@ -56,12 +50,7 @@ arma::mat NuclearDensityCalculator::optimized_method1(const arma::vec& rVals, co
     return result;
 }
 
-/**
- *
- * @param rVals
- * @param zVals
- * @return
- */
+
 arma::mat NuclearDensityCalculator::optimized_method2(const arma::vec& rVals, const arma::vec& zVals)
 {
     Chrono local("optimized_method2");
@@ -91,11 +80,8 @@ arma::mat NuclearDensityCalculator::optimized_method2(const arma::vec& rVals, co
  * One can prove the following property:
  * colA * rowA %  colB * rowB == (colA%colB) * (rowA%rowB) which allows
  * us to do even mode factorisations !
- * @param rVals
- * @param zVals
- * @return
  */
-arma::mat NuclearDensityCalculator::optimized_method3(const arma::vec& rVals, const arma::vec& zVals)
+arma::mat NuclearDensityCalculator::optimized_method3(const arma::vec& rVals, const arma::vec& zVals) const
 {
     Chrono local("optimized_method3");
     FactorisationHelper<struct quantum_numbers, int> nza_factored_sum(select_nza, symmetry_filter);
@@ -196,10 +182,9 @@ void NuclearDensityCalculator::printRhoDefs()
 }
 
 
-arma::cube NuclearDensityCalculator::density_cartesian(const int xyPoints, const int zPoints, const arma::vec rVals, const arma::mat res) {
+arma::cube  NuclearDensityCalculator::density_cartesian(const int xyPoints, const int zPoints, const arma::vec& rVals, const arma::mat& res) {
     // Create an empty cube of the correct size
     arma::cube cube(xyPoints, xyPoints, zPoints, arma::fill::zeros);
-
     // For each point (x,y) compute the corresponding radius, find it in the rVals list
     // and put all the values with variating z in the cube
     for (int x = 0 ; x < xyPoints ; x++) {
@@ -213,6 +198,5 @@ arma::cube NuclearDensityCalculator::density_cartesian(const int xyPoints, const
             cube.tube(x,y) = res.row(k);
         }
     }
-    
     return cube;
 }

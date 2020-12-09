@@ -1,6 +1,6 @@
 #Compiler config for the main target
 CC = g++ -std=c++11 -fopenmp
-LD = $(CC) -std=c++11
+LD = $(CC) -std=c++11 -larmadillo
 CFLAGS = -Wall -Wextra -O2 -I /usr/local/include -march=native -mtune=native
 #CFLAGS += -Wall -Wextra -Werror -pedantic -ansi -Wshadow -Wdouble-promotion -Wundef -fno-common -Wconversion -Wunused-parameter
 TEST_CFLAGS += $(CFLAGS) -I$(FUSED_GTEST_TMP_DIR) -larmadillo -Og -DGTEST_HAS_PTHREAD=0

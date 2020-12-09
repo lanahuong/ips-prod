@@ -1,15 +1,22 @@
 #include "Saver.h"
 
+#include <utility>
+
 /**
- * @param z the z values where functions were evaluated
- * @param f the matrix containing a function on each row
+ * @param d the z values where functions were evaluated
+ * @param filename the matrix containing a function on each row
  */
 void Saver::saveToCSV(const arma::mat& d, std::string filename)
 {
-  d.save(filename, arma::csv_ascii);
+  d.save(std::move(filename), arma::csv_ascii);
 }
 
-void Saver::cubeToDf3(const arma::cube &m, std::string filename) {
+/**
+ *
+ * @param m
+ * @param filename
+ */
+void Saver::cubeToDf3(const arma::cube &m, const std::string& filename) {
     std::stringstream ss(std::stringstream::out | std::stringstream::binary);
     uint nx = m.n_rows;
     uint ny = m.n_cols;
