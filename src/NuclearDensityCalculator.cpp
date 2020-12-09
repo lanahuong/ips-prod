@@ -197,3 +197,32 @@ void NuclearDensityCalculator::printRhoDefs()
         }
     }
 }
+
+/**
+ * @brief Convert the density form cylindric to cartesian coordinates
+ * @param xyPoints the number of points on x and y axis
+ * @param zPoints the number of points on the z axis
+ * @param rVals the r values for which the density was calculated in \a res
+ * @param res the matrix of density values in cylindric coordinates
+ * @return a cube containing the density in cartesian coordinates
+ */
+arma::cube NuclearDensityCalculator::density_cartesian(const int xyPoints, const int zPoints, const arma::vec rVals, const arma::mat res) {
+    // Create an empty cube of the correct size
+    arma::cube cube(xyPoints, xyPoints, zPoints, arma::fill::zeros);
+
+    // For each point (x,y) compute the corresponding radius, find it in the rVals list
+    // and put all the values with variating z in the cube
+    for (int x = 0 ; x < xyPoints ; x++) {
+        double x_real = rVals(x);
+        for (int y = 0 ; y < xyPoints ; y++) {
+            double y_real = rVals(y);
+            double r = sqrt(x_real * x_real + y_real * y_real);
+            arma::vec r_diff = arma::abs(rVals - r);
+            arma::uword k = r_diff.index_min();
+            
+            cube.tube(x,y) = res.row(k);
+        }
+    }
+    
+    return cube;
+}

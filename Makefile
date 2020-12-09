@@ -1,5 +1,5 @@
 #Compiler config for the main target
-CC = g++ -std=c++11
+CC = g++ -std=c++11 -fopenmp
 LD = $(CC) -std=c++11
 CFLAGS = -Wall -Wextra -O2 -I /usr/local/include -march=native -mtune=native
 #CFLAGS += -Wall -Wextra -Werror -pedantic -ansi -Wshadow -Wdouble-promotion -Wundef -fno-common -Wconversion -Wunused-parameter
