@@ -31,19 +31,23 @@ public:
     /**
      * Basis constructor
      * @param BR Basis deformation along radius
-     * @param bz Basis deformation along z axis
+     * @param BZ Basis deformation along z axis
      * @param N Basis truncation parameter
      * @param Q Basis truncation parameter
      */
-    Basis(double BR, double bz, int N, double Q);
+    Basis(double BR, double BZ, int N, double Q);
 
     /**
      * Special constructor to use if we want to accelerate computing by
      * pre-computing some values and storing the computed ones.
-     * @param rVals
-     * @param zVals
+     * @param BR Basis deformation along radius
+     * @param BZ Basis deformation along z axis
+     * @param N Basis truncation parameter
+     * @param Q Basis truncation parameter
+     * @param rVals radius values vector to be used to precompute values and accelerate computations
+     * @param zVals z values vector to be used to precompute values and accelerate computations
      */
-    Basis(double BR, double bz, int N, double Q, const arma::vec& rVals, const arma::vec& zVals);
+    Basis(double BR, double BZ, int N, double Q, const arma::vec& rVals, const arma::vec& zVals);
 
     /**
      * Compute the r part of the function
@@ -75,11 +79,12 @@ public:
 
     /**
      * Function used to access memoised values.
+     * @param nz
      */
     arma::vec zPart_mem(int nz);
 
     /**
-     *
+     * Computes
      * @param m Quantum number
      * @param n Quantum number
      * @param nz Quantum number
@@ -88,6 +93,14 @@ public:
      * @return a matrix where Mat(i,j) corresponds to \f$ \Psi_{m_a, n_a, n_{za}} (r_i, z_j) \f$
      */
     arma::mat basisFunc(int m, int n, int nz, const arma::vec& rVec, const arma::vec& zVec);
+
+    /**
+     * @see basisFunc but uses vectors that were provided in the constructor
+     * @param m Quantum number
+     * @param n Quantum number
+     * @param nz Quantum number
+     * @return
+     */
     arma::mat basisFunc_mem(int m, int n, int nz);
 
 private:
@@ -102,7 +115,7 @@ private:
     std::vector<arma::vec> computed_z_vals;/**< stored zVals if is_mem */
     std::vector<bool> computed_r_indices;/**< computed indices if is_mem */
     std::vector<arma::vec> computed_r_vals;/**< stored rVals if is_mem */
-    Poly poly_mem;
+    Poly poly_mem; /**< Holds all the polynomials computed to the max values needed and with the constructor's vectors */
 
     /**
      * Given the definition and nMax being >=0 , if Q is null the sup is not defined
