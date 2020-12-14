@@ -20,7 +20,7 @@ FUSED_GTEST_TMP_DIR = tmp
 GTEST_SRC = gtest
 
 #Names of the targets
-TARGET = $(BINDIR)/solver
+TARGET = $(BINDIR)/nuclearDensity
 TEST_TARGET = $(BINDIR)/tests
 
 all : makedirs $(TARGET)
