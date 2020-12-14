@@ -22,7 +22,7 @@ To build the whole project, go to the root of the project and run :
 make
 ```
 
-To run the unit tests you can run `bin/tests`.
+To run the unit tests you can run `bin/tests --gtest_color=yes`.
 
 To build only the tests use :
 

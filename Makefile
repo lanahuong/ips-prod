@@ -65,9 +65,6 @@ ALL_TEST_OBJECTS = $(OBJECTS) $(OBJDIR)/gtest-all.o $(OBJDIR)/gtest_main.o $(TES
 .PHONY : tests
 tests : makedirs $(TEST_TARGET)
 
-check : makedirs $(TEST_TARGET)
-	$(TEST_TARGET) --gtest_color=yes
-
 #GTEST special objects
 $(FUSED_GTEST_H) :
 	$(GTEST_SRC)/googletest/scripts/fuse_gtest_files.py $(FUSED_GTEST_TMP_DIR)
