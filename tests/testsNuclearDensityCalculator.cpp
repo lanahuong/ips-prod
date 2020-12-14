@@ -83,7 +83,7 @@ class DensityPointTest : public NuclearDensityTest,
     public:
         arma::cube cube;
         DensityPointTest() {
-            cube = ndc->density_cartesian(xyPoints, zPoints, *rVals, *res);
+            cube = NuclearDensityCalculator::density_cartesian(xyPoints, zPoints, *rVals, *res);
         }
 };
 
