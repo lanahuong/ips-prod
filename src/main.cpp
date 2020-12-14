@@ -19,7 +19,7 @@ int main()
 
     Saver::saveToCSV(res, "tmp/density-r-z.csv");
     
-    arma::cube cube = nuclearDensityCalculator.density_cartesian(xyPoints, zPoints, rVals, res);
+    arma::cube cube = NuclearDensityCalculator::density_cartesian(xyPoints, zPoints, rVals, res);
 
     Saver::cubeToDf3(cube, "tmp/density-r-z.df3");
 

@@ -27,8 +27,8 @@ class Saver {
 
   /**
    *
-   * @param m
-   * @param filename
+   * @param m the cube to save to df3
+   * @param filename the name of the df3 file (must end with .df3)
    */
   static void cubeToDf3(const arma::cube &m, const std::string& filename);
 };

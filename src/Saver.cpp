@@ -13,8 +13,6 @@ void Saver::saveToCSV(const arma::mat& d, std::string filename)
 
 /**
  *
- * @param m
- * @param filename
  */
 void Saver::cubeToDf3(const arma::cube &m, const std::string& filename) {
     std::stringstream ss(std::stringstream::out | std::stringstream::binary);

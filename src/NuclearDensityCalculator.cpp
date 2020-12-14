@@ -154,14 +154,6 @@ NuclearDensityCalculator::NuclearDensityCalculator()
 }
 
 /**
- *
- * @param m
- * @param n
- * @param n_z
- * @param mp
- * @param np
- * @param n_zp
- * @return
  */
 inline double NuclearDensityCalculator::rho(int m, int n, int n_z, int mp, int np, int n_zp) const
 {

@@ -27,9 +27,10 @@
  */
 class Poly {
 private:
+  /** matrix of hermite polynomials (n,z) */
   arma::mat hermitePolynomial;
+  /** cube of laguerre polynomials (m,n,z)*/
   arma::cube laguerrePolynomial;
-
 public:
   /**
    * @brief Iteratively evaluate the Hermite polynomial on a vector

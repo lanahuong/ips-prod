@@ -51,10 +51,10 @@ public:
 
     /**
      * Compute the r part of the function
-     * @param rVec
-     * @param m Angular momentum ?
-     * @param n Principal quantum number
-     * @param use_mem Is set to true if the function is called from a memoized context
+     * @param rVec vector of r values
+     * @param m quantum number
+     * @param n quantum number
+     * @param use_mem is set to true if the function is called from a memoized context
      * Protects the user if the user calls the function directly while the class was
      * set to be memoised.
      * @return the r part of the function
@@ -63,13 +63,15 @@ public:
 
     /**
      * Function used to access memoised values.
+     * @param m quantum number
+     * @param n quantum number
      */
     arma::vec rPart_mem(int m, int n);
 
     /**
      * Compute the z part of the function
-     * @param zVec
-     * @param nz
+     * @param zVec vector of z values
+     * @param nz quantum number
      * @param use_mem Is set to true if the function is called from a memoized context
      * Protects the user if the user calls the function directly while the class was
      * set to be memoised.
@@ -79,26 +81,26 @@ public:
 
     /**
      * Function used to access memoised values.
-     * @param nz
+     * @param nz quantum number
      */
     arma::vec zPart_mem(int nz);
 
     /**
      * Computes
-     * @param m Quantum number
-     * @param n Quantum number
-     * @param nz Quantum number
-     * @param rVec Vector of r[i]
-     * @param zVec Vector of r[j]
+     * @param m quantum number
+     * @param n quantum number
+     * @param nz quantum number
+     * @param rVec vector of r[i]
+     * @param zVec vector of r[j]
      * @return a matrix where Mat(i,j) corresponds to \f$ \Psi_{m_a, n_a, n_{za}} (r_i, z_j) \f$
      */
     arma::mat basisFunc(int m, int n, int nz, const arma::vec& rVec, const arma::vec& zVec);
 
     /**
      * @see basisFunc but uses vectors that were provided in the constructor
-     * @param m Quantum number
-     * @param n Quantum number
-     * @param nz Quantum number
+     * @param m quantum number
+     * @param n quantum number
+     * @param nz quantum number
      * @return
      */
     arma::mat basisFunc_mem(int m, int n, int nz);
@@ -121,8 +123,8 @@ private:
      * Given the definition and nMax being >=0 , if Q is null the sup is not defined
      * if Q non null, nMax is equal to
      * \f$ \lfloor  (N+2)Q^{-1/3} -0.5 Q^{-1}  \rfloor  \f$
-     * @param N
-     * @param Q
+     * @param N truncation parameter
+     * @param Q truncation parameter
      */
     static int calcMMax(int N, double Q);
 
@@ -133,8 +135,8 @@ private:
 
     /**
      * Initializes the n_zmax matrix
-     * @param N
-     * @param Q
+     * @param N truncation parameter
+     * @param Q truncation parameter
      */
     arma::imat calcN_zMax(int N, double Q);
 
