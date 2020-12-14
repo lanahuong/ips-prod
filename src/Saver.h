@@ -21,9 +21,16 @@
 class Saver {
  public:
   /**
-   * @brief Save functions \a f to CSV
+   * @brief Save matrix \a d to CSV
    */
-  static void saveToCSV(const arma::rowvec&, const arma::mat&);
+  static void saveToCSV(const arma::mat&, std::string);
+
+  /**
+   *
+   * @param m the cube to save to df3
+   * @param filename the name of the df3 file (must end with .df3)
+   */
+  static void cubeToDf3(const arma::cube &m, const std::string& filename);
 };
 
 #endif // !SAVER_H

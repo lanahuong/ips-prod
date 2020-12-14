@@ -1,6 +1,6 @@
 #include "main.h"
 #include "NuclearDensityCalculator.h"
-#include "savers/3Dsavers.h"
+#include "Saver.h"
 
 using namespace std;
 
@@ -16,10 +16,12 @@ int main()
     arma::mat rVals = arma::linspace(-xyBound, xyBound, xyPoints);
     arma::mat zVals = arma::linspace(-zBound, zBound, zPoints);
     arma::mat res = nuclearDensityCalculator.optimized_method3(rVals, zVals);
-    
-    arma::cube cube = nuclearDensityCalculator.density_cartesian(xyPoints, zPoints, rVals, res);
 
-    std::cout << cubeToDf3(cube);
+    Saver::saveToCSV(res, "tmp/density-r-z.csv");
+    
+    arma::cube cube = NuclearDensityCalculator::density_cartesian(xyPoints, zPoints, rVals, res);
+
+    Saver::cubeToDf3(cube, "tmp/density-r-z.df3");
 
     return 0;
 }

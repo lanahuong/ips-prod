@@ -24,8 +24,8 @@ template<typename T, typename fa>
 struct factored {
   fa factor;
   std::vector<T> factored_out;
-  inline factored(fa factor, std::vector<T>&& vec)
-          :factor(factor), factored_out(std::move(vec))
+  inline factored(fa fact, std::vector<T>&& vec)
+          :factor(fact), factored_out(std::move(vec))
   {
       factored_out.reserve(50);
   }
@@ -39,8 +39,8 @@ struct factored {
 template<typename T, typename f>
 class FactorisationHelper {
 public:
-    typedef bool(* input_filter)(T& a);
-    typedef f (* selector_function)(const T& a);
+    typedef bool(* input_filter)(T& a); /**< Filters and modifies the input to apply things such as symmetries etc */
+    typedef f (* selector_function)(const T& a); /**< A function  */
 
     /**
      * Constructor of the factorisation helper.
@@ -55,7 +55,7 @@ public:
      * @param filter to filter some values out
      * @param selector to select the values we want to factor out;
      */
-    FactorisationHelper(std::vector<T>& input, selector_function selector, input_filter filter = [](T& a) { return true; });
+    FactorisationHelper(std::vector<T>& input, selector_function selector, input_filter filter = [](T& a __attribute__((unused))) { return true; });
 
     /**
      * Adds an entry to the factoriser
@@ -114,13 +114,7 @@ inline void FactorisationHelper<T, f>::dispatch_entry(const T& entry)
     }
 }
 
-/**
- *
- * @tparam T
- * @tparam f
- * @param selec
- * @param filt
- */
+
 template<typename T, typename f>
 FactorisationHelper<T, f>::FactorisationHelper(selector_function selec, input_filter filt)
         :filter(filt), selector(selec)

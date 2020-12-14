@@ -1,7 +1,7 @@
 #include "Poly.h"
 
 void Poly::calcHermite(uint nMax, const arma::vec &vec) {
-    /**
+    /*
      * If the parameters are nonsense the matrix (0) is returned
      */
     arma::uword rowLen(vec.size());
@@ -26,7 +26,7 @@ arma::vec  Poly::laguerre(int m, int n)const {
 }
 
 void Poly::calcLaguerre(int mMax, int nMax, const arma::vec &z) {
-    /**
+    /*
      * Initialize the cube and helper vectors. Initialize also the first two slices (if needed) for the recursion
      */
     laguerrePolynomial = arma::cube(mMax, z.n_elem, nMax, arma::fill::ones);
@@ -37,7 +37,7 @@ void Poly::calcLaguerre(int mMax, int nMax, const arma::vec &z) {
         laguerrePolynomial.slice(1) = 1+(m*row_ones)-col_ones*z.as_row();
     }
 
-    /**
+    /*
      * Now we build our cube, each slice is a matrix and within such slice N is constant, so we
      * will operate on slices, its faster.
      * The slice 0 is already filled with ones

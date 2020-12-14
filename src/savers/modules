@@ -1,2 +1,0 @@
-MODULES += savers/Saver savers/3Dsavers
-ORPHANED_HEADERS =

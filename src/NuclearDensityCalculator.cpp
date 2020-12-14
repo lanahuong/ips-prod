@@ -7,12 +7,6 @@
 #include "FactorisationHelper.hpp"
 
 
-/**
- *
- * @param rVals
- * @param zVals
- * @return
- */
 arma::mat NuclearDensityCalculator::naive_method(const arma::vec& rVals, const arma::vec& zVals)
 {
     Chrono local("naive_method");
@@ -56,12 +50,7 @@ arma::mat NuclearDensityCalculator::optimized_method1(const arma::vec& rVals, co
     return result;
 }
 
-/**
- *
- * @param rVals
- * @param zVals
- * @return
- */
+
 arma::mat NuclearDensityCalculator::optimized_method2(const arma::vec& rVals, const arma::vec& zVals)
 {
     Chrono local("optimized_method2");
@@ -91,11 +80,8 @@ arma::mat NuclearDensityCalculator::optimized_method2(const arma::vec& rVals, co
  * One can prove the following property:
  * colA * rowA %  colB * rowB == (colA%colB) * (rowA%rowB) which allows
  * us to do even mode factorisations !
- * @param rVals
- * @param zVals
- * @return
  */
-arma::mat NuclearDensityCalculator::optimized_method3(const arma::vec& rVals, const arma::vec& zVals)
+arma::mat NuclearDensityCalculator::optimized_method3(const arma::vec& rVals, const arma::vec& zVals) const
 {
     Chrono local("optimized_method3");
     FactorisationHelper<struct quantum_numbers, int> nza_factored_sum(select_nza, symmetry_filter);
@@ -168,23 +154,12 @@ NuclearDensityCalculator::NuclearDensityCalculator()
 }
 
 /**
- *
- * @param m
- * @param n
- * @param n_z
- * @param mp
- * @param np
- * @param n_zp
- * @return
  */
 inline double NuclearDensityCalculator::rho(int m, int n, int n_z, int mp, int np, int n_zp) const
 {
     return imported_rho_values.at(ind.at(n_z, n, m), ind.at(n_zp, np, mp));
 }
 
-/**
- *
- */
 void NuclearDensityCalculator::printRhoDefs()
 {
     uint i = 0;
@@ -198,18 +173,10 @@ void NuclearDensityCalculator::printRhoDefs()
     }
 }
 
-/**
- * @brief Convert the density form cylindric to cartesian coordinates
- * @param xyPoints the number of points on x and y axis
- * @param zPoints the number of points on the z axis
- * @param rVals the r values for which the density was calculated in \a res
- * @param res the matrix of density values in cylindric coordinates
- * @return a cube containing the density in cartesian coordinates
- */
-arma::cube NuclearDensityCalculator::density_cartesian(const int xyPoints, const int zPoints, const arma::vec rVals, const arma::mat res) {
+
+arma::cube  NuclearDensityCalculator::density_cartesian(const int xyPoints, const int zPoints, const arma::vec& rVals, const arma::mat& res) {
     // Create an empty cube of the correct size
     arma::cube cube(xyPoints, xyPoints, zPoints, arma::fill::zeros);
-
     // For each point (x,y) compute the corresponding radius, find it in the rVals list
     // and put all the values with variating z in the cube
     for (int x = 0 ; x < xyPoints ; x++) {
@@ -223,6 +190,5 @@ arma::cube NuclearDensityCalculator::density_cartesian(const int xyPoints, const
             cube.tube(x,y) = res.row(k);
         }
     }
-    
     return cube;
 }

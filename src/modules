@@ -1,5 +1,3 @@
-MODULES += Basis Poly NuclearDensityCalculator
+MODULES += Basis Poly NuclearDensityCalculator Saver
 MAIN = main
 ORPHANED_HEADERS = constants
-
-include src/savers/modules

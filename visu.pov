@@ -110,6 +110,15 @@ object{Axis_(AxisLY,TexRed,TexWhite)
 object{Axis_(AxisLZ,TexRed,TexWhite)
        rotate<90,0,  0>}// z-Axis
 
+text{ttf"arial.ttf",  "z",  0.01,  0
+     texture{TexRed} 
+     scale 1.2 translate <AxisLX+0.05,0.7,-0.12>}
+text{ttf"arial.ttf",  "y",  0.01,  0  
+     texture{TexRed} 
+     scale 1.2 translate <-0.85,AxisLY+0.50,-0.05>}
+text{ttf"arial.ttf",  "x",  0.01,  0
+     texture{TexRed} 
+     scale 1.2 translate <-0.75,0.2,AxisLZ+0.50>}
 } // end of union
 #end// of macro "AxisXYZ(...)"  -----------
 //-- drawing the axis -- Achsen zeichnen --
@@ -187,7 +196,7 @@ pigment { checker
 // isosurface
 #declare F=function{
 pattern{
-density_file df3 "example.df3"
+density_file df3 "tmp/density-r-z.df3"
 
 #if (INTERPOLATE=0)
   interpolate 0
@@ -236,7 +245,7 @@ box
    intervals 10
    density
    {
-    density_file df3 "example.df3"
+    density_file df3 "tmp/density-r-z.df3"
 
 #if (INTERPOLATE=0)
   interpolate 0
@@ -289,6 +298,17 @@ box
 {
  <-10.2,-8,-4><-10.3,-8.01,-5>
  pigment{color rgb <1,1,1>}
+}
+
+// texte de la legende "2 fm"
+text
+{
+ ttf "arial.ttf", "2 fm",  0.01,  0
+ pigment{color rgb <1,1,1>}
+ rotate x*90
+ rotate y*-90
+ scale 0.8
+ translate <-10.6,-8,-5>
 }
 
 

@@ -36,13 +36,19 @@ public:
      */
     ThreadSafeAccumulator(const T& acc, operation_type type);
 
+    /**
+     * Optionnal constructor that takes an accumulator function.
+     * which is going to be executed on all the values in an unknown order.
+     * @param acc
+     * @param function
+     */
     ThreadSafeAccumulator(const T& acc, acc_function function);
 
     /**
-     * Computes buffered ops if needed
+     * Computes buffered operations if needed
      * @return the result of the build
      */
-    T GetResult();
+    inline T GetResult();
 
     /**
      * Pushes a value to the accumulator.
@@ -51,28 +57,44 @@ public:
     inline void push(const T& arg);
 
 private:
+    /**
+     * Acquires the spinlock of the accumulator
+     */
     inline void acquire_lock();
 
+    /**
+     * Releases the spinlock of the main accumulator
+     */
     inline void release_lock();
 
+    /**
+     * Acquires the spinlock of the buffer
+     */
     inline void acquire_buffer_lock();
 
+    /**
+     * Releases the lock of the buffer
+     */
     inline void release_buffer_lock();
 
+    /**
+     * Performs an atomic operation between the value and the buffer
+     * @param arg
+     */
     inline void exec_operation(const T& arg);
 
-    const acc_function fun = nullptr;
-    T result;
-    const operation_type op = operation_type::Nop;
-    std::list<T> buffer{};
-    volatile bool result_locked = false;
-    volatile bool buffer_locked = false;
+    const acc_function   fun           = nullptr;
+    T                    result;/**< Corresponds to the accumulator */
+    const operation_type op            = operation_type::Nop; /**< Selected operation */
+    std::list<T>         buffer{}; /**< Buffer that will hold the values so we dont wait for the main accumulator to unlock */
+    volatile bool        result_locked = false; /**< Volatile value as it should be checked each time in the loop as it can be changed by another thread */
+    volatile bool        buffer_locked = false; /**< Volatile value as it should be checked each time in the loop as it can be changed by another thread */
 };
 
 template<typename T>
-T ThreadSafeAccumulator<T>::GetResult()
+inline T ThreadSafeAccumulator<T>::GetResult()
 {
-    for (auto r : buffer) {
+    for (auto& r : buffer) {
         exec_operation(r);
     }
     return result;
@@ -91,13 +113,13 @@ inline void ThreadSafeAccumulator<T>::push(const T& arg)
 {
     if (result_locked) {
         acquire_buffer_lock();
-     //   std::cout << "buffering " << std::endl;
-        buffer.push_back(arg);
+        //   std::cout << "buffering " << std::endl;
+        buffer.push_back(std::move(arg));
         release_buffer_lock();
     }
     else {
         acquire_lock();
-        exec_operation(arg);
+        exec_operation(std::move(arg));
         release_lock();
     }
 }
@@ -130,11 +152,6 @@ inline void ThreadSafeAccumulator<T>::release_buffer_lock()
     buffer_locked = false;
 }
 
-/**
- * We must ensure the locks are properly placed etc
- * @tparam T
- * @param arg
- */
 template<typename T>
 inline void ThreadSafeAccumulator<T>::exec_operation(const T& arg)
 {
