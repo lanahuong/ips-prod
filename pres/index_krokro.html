@@ -37,7 +37,6 @@ Presentation template - N. Dubray - ENSIIE - 2020 - [:book:](../index.html)
 
 class: toc top
 # Table des matières
---
 
 1. Présentation du projet
     1. Le problème
@@ -185,6 +184,79 @@ Approche modulaire
 --
 
 Tous les modules doivent être déclarés au préalale dans les fichiers `module`.
+
+--
+
+```Makefile
+CC = g++ -std=c++11 -fopenmp
+LD = $(CC) -std=c++11 -larmadillo
+CFLAGS = -Wall -Wextra -O2 -I /usr/local/include -march=native -mtune=native
+TEST_CFLAGS += $(CFLAGS) -I$(FUSED_GTEST_TMP_DIR) -larmadillo -Og -DGTEST_HAS_PTHREAD=0
+LDFLAGS = -Wall -Wextra -larmadillo
+``` 
+
+--
+
+```Makefile
+BINDIR = bin
+OBJDIR = obj
+SRCDIR = src
+DOCDIR = doc
+TEST_SRCDIR = tests
+FUSED_GTEST_TMP_DIR = tmp
+GTEST_SRC = gtest
+
+TARGET = $(BINDIR)/nuclearDensity
+TEST_TARGET = $(BINDIR)/tests
+
+all : makedirs $(TARGET)
+``` 
+
+---
+
+# iii - Chaîne de compilation
+
+```Makefile
+CC = g++ -std=c++11 -fopenmp
+LD = $(CC) -std=c++11 -larmadillo
+CFLAGS = -Wall -Wextra -O2 -I /usr/local/include -march=native -mtune=native
+TEST_CFLAGS += $(CFLAGS) -I$(FUSED_GTEST_TMP_DIR) -larmadillo -Og -DGTEST_HAS_PTHREAD=0
+LDFLAGS = -Wall -Wextra -larmadillo
+``` 
+
+```Makefile
+BINDIR = bin
+OBJDIR = obj
+SRCDIR = src
+DOCDIR = doc
+TEST_SRCDIR = tests
+FUSED_GTEST_TMP_DIR = tmp
+GTEST_SRC = gtest
+
+TARGET = $(BINDIR)/nuclearDensity
+TEST_TARGET = $(BINDIR)/tests
+
+all : makedirs $(TARGET)
+``` 
+
+```Makefile
+MAIN_SRC = $(addprefix $(SRCDIR)/, $(MAIN:=.cpp))
+MAIN_OBJ = $(addprefix $(OBJDIR)/, $(MAIN:=.o))
+SOURCES = $(addprefix $(SRCDIR)/, $(MODULES:=.cpp))
+OBJECTS = $(addprefix $(OBJDIR)/, $(MODULES:=.o))
+ALL_OBJECTS = $(OBJECTS) $(MAIN_OBJ)
+ALL_HEADERS = $(addprefix $(SRCDIR)/, $(ORPHANED_HEADERS:=.h))
+ALL_SOURCES = $(SOURCES) $(MAIN_SRC)
+
+$(TARGET) : $(ALL_OBJECTS) $(ALL_SOURCES) $(ALL_HEADERS)
+	$(LD) $(LDFLAGS) -o $@ $(ALL_OBJECTS)
+
+$(MAIN_OBJ): obj/%.o : src/%.cpp $(MAIN_SRC)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(OBJECTS): obj/%.o : src/%.cpp $(SOURCES) $(ALL_HEADERS)
+	$(CC) $(CFLAGS) -c -o $@ $<
+```
 
 ---
 
