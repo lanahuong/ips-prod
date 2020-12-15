@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -14,280 +15,10 @@
 </head>
 <body>
 <textarea id="source" readonly>
-class: titlepage
 
-.title[
-Projet n°2 d'IPS
-]
 
-.subtitle[
-V. Dubromer - M. Migdal - L. Scravaglieri -- ENSIIE -- 2020
-]
 
----
-
-layout: true
-class: animated fadeIn middle numbers
-
-.footnote[
-Presentation template - N. Dubray - ENSIIE - 2020 - [:book:](../index.html)
-]
-
----
-
-class: toc top
-# Table des matières
-
-1. Présentation du projet
-    1. Le problème
-    2. Structure 
---
-
-2. Solution
-    1. Implémentation naïve
-    2. Tests unitaires
---
-
-3. Optimisation et Benchmarks
-    1. Optimisation des calculs
-    2. Benchmarks
---
-
-4. Résultats
-    1. Passage aux coordonnées cartésiennes
-    2. POVray & gnuplot
-
----
-
-# I.1 - Le problème 
-
-On veut calculer une densité nucléaire locale à l'aide de la formule suivante :
- 
-​
-
-`$$\rho(\mathbf{r})\equiv \sum_a \sum_b \rho_{ab}\psi_a(\mathbf{r})\psi^*_b(\mathbf{r})$$`
-
---
-
-Pour cela, nous avons eu besoin de calculer :
-.center[
-`$$\psi_{m,n,n_z}(r_\perp, \theta, z) = Z(z, n_z) . R(r_\perp, m, n) . e^{im\theta}$$`
-]
-
---
-
-Et donc, implémenter les fonctions suivantes, nécessitant respectivement le calcul de polynômes :
-
-de Laguerre
-.center[
-`$$Z(z, n_z) = \frac{1}{\sqrt{b_z}} \frac{1}{\sqrt{2^{n_z} \sqrt{\pi}n_z!}} e^{-\frac{z^2}{2b_z^2}}H_{n_z}\left(\frac{z}{b_z}\right)$$`
-]
-
---
-
-et de Hermite
-
-.center[
-`$$R(r_\perp, m, n) = \frac{1}{b_{\perp}\sqrt{\pi}} \sqrt{\frac{n!}{(n+|m|)!}} e^{-\frac{r_{\perp}^2}{2b_{\perp}^2}} \left(\frac{r_{\perp}}{b_{\perp}}\right)^{|m|} L_n^{|m|}\left(\frac{r_{\perp}^2}{b_{\perp}^2}\right).$$`
-]
-
----
-
-class: toc top
-
-# I.2 - Structure 
-
-i. `Arborescence`
-
-ii. `Classes`
-
-iii. `Chaîne de compilation`
-
-iv. `Makefile`
-
-v. `Documentation`
-
----
-
-class: toc top
-
-# i - Arborescence
-
-1. `src`
-
-2. `tests`
-
-3. `scripts`
-
-4. `doc`
-
-5. `gtest`
-
---
-
-```c
-Makefile                                // Makefile principal servant à compiler le code et la documentation
-README.md                               // 
-├── scripts/                            // Scripts python permettant de récupérer les visuels (résultats)
-    ├── csv_plotter.py
-    ├── generateHermiteCoefs.py
-├── src/                                // Sources
-    ├── NuclearDensityCalculator.cpp
-    ├── Basis.cpp
-    ├── main.cpp
-    ├── Saver.cpp
-    └── Poly.cpp
-├── tests/                              // Tests obligatoires et autres tests nous ayant semblé pertinents
-    ├── testsMandatory.cpp
-    ├── testNuclearDensityCalculator.cpp
-```
-
----
-
-# ii -  Classes
-
-![](images/class-diagram.png)
-
-
----
-
-class: top
-
-# iii - Chaîne de compilation
-
-Chaîne de compilation séparée en deux parties :
-* Solveur
-* GoogleTest
-
---
-
-Approche modulaire 
-
---
-
-Tous les modules doivent être déclarés au préalale dans les fichiers `module`.
-
----
-
-#iv - Makefile
-
-```Makefile
-CC = g++ -std=c++11 -fopenmp
-LD = $(CC) -std=c++11 -larmadillo
-CFLAGS = -Wall -Wextra -O2 -I /usr/local/include -march=native -mtune=native
-TEST_CFLAGS += $(CFLAGS) -I$(FUSED_GTEST_TMP_DIR) -larmadillo -Og -DGTEST_HAS_PTHREAD=0
-LDFLAGS = -Wall -Wextra -larmadillo
-``` 
-
---
-
-```Makefile
-BINDIR = bin
-OBJDIR = obj
-SRCDIR = src
-DOCDIR = doc
-TEST_SRCDIR = tests
-FUSED_GTEST_TMP_DIR = tmp
-GTEST_SRC = gtest
-
-TARGET = $(BINDIR)/nuclearDensity
-TEST_TARGET = $(BINDIR)/tests
-
-all : makedirs $(TARGET)
-``` 
---
-
-```Makefile
-MAIN_SRC = $(addprefix $(SRCDIR)/, $(MAIN:=.cpp))
-MAIN_OBJ = $(addprefix $(OBJDIR)/, $(MAIN:=.o))
-SOURCES = $(addprefix $(SRCDIR)/, $(MODULES:=.cpp))
-OBJECTS = $(addprefix $(OBJDIR)/, $(MODULES:=.o))
-ALL_OBJECTS = $(OBJECTS) $(MAIN_OBJ)
-ALL_HEADERS = $(addprefix $(SRCDIR)/, $(ORPHANED_HEADERS:=.h))
-ALL_SOURCES = $(SOURCES) $(MAIN_SRC)
-
-$(TARGET) : $(ALL_OBJECTS) $(ALL_SOURCES) $(ALL_HEADERS)
-	$(LD) $(LDFLAGS) -o $@ $(ALL_OBJECTS)
-
-$(MAIN_OBJ): obj/%.o : src/%.cpp $(MAIN_SRC)
-	$(CC) $(CFLAGS) -c -o $@ $<
-
-$(OBJECTS): obj/%.o : src/%.cpp $(SOURCES) $(ALL_HEADERS)
-	$(CC) $(CFLAGS) -c -o $@ $<
-```
-
----
-
-# v - Documentation
-
---
-* Doxygen
-
---
-* EXTRACT_PRIVATE = YES
-
---
-* INPUT += README.md
-* USE_MDFILE_AS_MAINPAGE = README.md
-
---
-* EXCLUDE = src/hermiteCoefs.h
-
----
-
-# v - Documentation
-
-
-
----
-
-# v - Documentation
-
-
-
----
-
-# II.1 - Implémentation naïve
-
-.center[
-`$$\rho(\mathbf{r}) = \sum_{m}\sum_{n}\sum_{n_z}\sum_{mp}\sum_{np}\sum_{n_{zp}}(\rho_{m, n, n_z, mp,np,n_{zp}}\psi_{m,n,n_z}(\mathbf{r})\psi^*_{mp,np,n_{zp}}(\mathbf{r}))$$`
-]
-
-```c++
-arma::mat NuclearDensityCalculator::naive_method(const arma::vec& rVals, const arma::vec& zVals)
-{
-    Chrono local("naive_method");
-    arma::mat result = arma::zeros(rVals.size(), zVals.size()); // number of points on r- and z- axes
-    for (int m = 0; m<basis.mMax; m++) {
-        for (int n = 0; n<basis.nMax(m); n++) {
-            for (int n_z = 0; n_z<basis.n_zMax(m, n); n_z++) {
-                for (int mp = 0; mp<basis.mMax; mp++) {
-                    for (int np = 0; np<basis.nMax(mp); np++) {
-                        for (int n_zp = 0; n_zp<basis.n_zMax(mp, np); n_zp++) {
-                            arma::mat funcA = basis.basisFunc(m, n, n_z, rVals, zVals);
-                            arma::mat funcB = basis.basisFunc(mp, np, n_zp, rVals, zVals);
-                            result += funcA%funcB*rho(m, n, n_z, mp, np, n_zp);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return result;
-}
-```
-
----
-
-#II.2 - Tests unitaires
-
-TODO : Ajout des tests unitaires pour l'implémentation naïve
-
----
-
-class: toc top
-
-# III.1.a - Optimisations préliminaires
+# 3a - Optimisations préliminaires
 
 ## 1 - Polynômes de Laguerre
 
@@ -328,7 +59,7 @@ static_cast<int>(floor((N + 2) * pow(Q, -1.0 / 3.0) - 0.5 * pow(Q, -1)));
 
 ---
 
-# III.1.a - Optimisations préliminaires
+# 3a - Optimisations préliminaires
 
 ## 3 - Calculs de `zPart` (et `rPart`).
 
@@ -375,7 +106,7 @@ arma::vec Basis::zPart(const arma::vec &zVec, int nz, bool use_mem = false) {
 
 ---
 
-# III.1.b - Optimisation du calcul de densité
+# 3b - Optimisation du calcul de densité
 
 ## 1 - Version naïve
 Classe `Chrono` qui affiche le temps sur stderr en fin de scope et un message.
@@ -420,7 +151,7 @@ arma::mat NuclearDensityCalculator::naive_method(const arma::vec& rVals, const a
 
 ---
 
-# III.1.b - Optimisation du calcul de densité
+# 3b - Optimisation du calcul de densité
 
 ## 3 - Optimisation 2 ...
 
@@ -445,7 +176,7 @@ arma::mat Basis::basisFunc_mem(int m, int n, int nz) {
 
 ---
 
-# III.1.b - Optimisation du calcul de densité
+# 3b - Optimisation du calcul de densité
 
 ## 4 - Notre solution ! 
 
@@ -481,7 +212,7 @@ NB : Les définitions ne sont pas là, mais il faut fournir au "factoriseur" les
 
 ---
 
-# III.1.b - Optimisation du calcul de densité
+# 3b - Optimisation du calcul de densité
 
 ## 4 - Notre solution ! 
 
@@ -517,7 +248,7 @@ return builder->GetResult();
 
 ---
 
-# III.1.b - Optimisation du calcul de densité
+# 3b - Optimisation du calcul de densité
 
 ## 5 - Conclusion sur notre approche
 
@@ -541,110 +272,6 @@ Inconvénients :
 On se rendra compte dans les benchmarks qu'on est surtout "memory bound".
 
 --- 
-
-
----
-
-class: toc top
-
-# III.2 - Benchmarks
-
-## 1 - Méthode naïve non mémoïsée
-
-18 secondes en moyenne sur 4 exécutions.
-
---
-
-## 2 - Méthode naïve mémoisée 
-
-8 secondes en moyenne sur 4 exécutions.
-
---
-
-## 3 - Méthode la plus optimisée single thread
-
-Environ 6ms en moyenne sur 1000 exécutions. La méthode `optimized_method3` est `const`, ses appels sont indépentants.
-
---
-
-## 4 - Méthode la plus optimisée + openMP
-
-Environ 1,8ms sur une moyenne de 1000 exécutions.
-
-Dans ce temps, on a passé en moyenne 1.10 ms dans les factorisations dont 0.4 dans la factorisation initiale.
-
-Cet overhead est indépendant du nombre de points. On a un speedup de 10 000. 
-
-
----
-
-class: toc top
-
-# III.2 - Benchmarks
-
-## 5 - Remarques sur la validité des tests
-
-
-Si on multiplie le nombre de points par 4, on a une durée d'exécution de 3.9 ms en moyenne contre 52 secondes pour la naïve soit un speedup de 13 000. On peut extrapoler qu'asymptotiquement il restera proche. Cependant les tests deviennent extrêmenent longs, même en utilisant des méthodes intermédiaires.
-
-NB : Nous n'avons pas utilisé -Ofast pour le test de la méthode naïve car il nous semblait que GCC tentait de mettre des threads dans notre code et on avait une consommation systématique du CPU de 100%. Son impact est de l'ordre de 20% sur la méthode la plus optimisée.
-
-Les flags utilisés pour le dernier tests étaient : `-march=native -mtune=native -Ofast -flto -fopenmp`.
-
---- 
-
----
-
-class: center
-
-# IV.1 - Passage en coordonnées cartésiennes
-
-$x^2 + y^2 = R^2$
-
-$\sqrt{x^2 + y^2} = R$
-
-$r \in [r_0, ..., r_n]$ tel que $|r-R|$ est minimal
-
-cube[x,y,\_] = mat(r,\_)
-
----
-
-# IV.2 - Résultats POVray
-
-.w70.hcenter[
-![](images/visu.png)
-]
-
----
-# Densité en fonction de r et z
-
-![](images/density-r-z.png)
-
----
-# Script gnuplot
-
-```
-set datafile separator comma
-
-load 'scripts/magma.pal'
-
-set xrange [-20 :20 ]
-set yrange [-10 : 10]
-set size ratio 0.5
-
-set terminal png size 600,300
-set output "tmp/density-r-z.png"
-
-set title "Intensité de la densité nucléaire en fonction de z et r"
-set xlabel "z (fm)"
-set ylabel "r (fm)"
-set tics nomirror out scale 1
-
-plot "tmp/density-r-z.csv" matrix u (40*($1-32)/63):(20*($2-16)/31):3 with image notitle
-```
-
-
-
 
 
 </textarea>
