@@ -103,19 +103,11 @@ class: toc top
 
 i. `Arborescence`
 
---
-
 ii. `Classes`
-
---
 
 iii. `Chaîne de compilation`
 
---
-
 iv. `Makefile`
-
---
 
 v. `Documentation`
 
@@ -127,19 +119,11 @@ class: toc top
 
 1. `src`
 
---
-
 2. `tests`
-
---
 
 3. `scripts`
 
---
-
 4. `doc`
-
---
 
 5. `gtest`
 
@@ -304,16 +288,10 @@ arma::mat NuclearDensityCalculator::naive_method(const arma::vec& rVals, const a
 TODO : Ajout des tests unitaires pour l'implémentation naïve
 
 ---
+
 class: toc top
-# III.1 - Optimisation des calculs
 
-## a - Optimisations préliminaires
-
-## b - Optimisation du calcul de densité
-
----
-
-# 3a - Optimisations préliminaires
+# III.1.a - Optimisations préliminaires
 
 ## 1 - Polynômes de Laguerre
 
@@ -354,7 +332,7 @@ static_cast<int>(floor((N + 2) * pow(Q, -1.0 / 3.0) - 0.5 * pow(Q, -1)));
 
 ---
 
-# 3a - Optimisations préliminaires
+# III.1.a - Optimisations préliminaires
 
 ## 3 - Calculs de `zPart` (et `rPart`).
 
@@ -401,7 +379,7 @@ arma::vec Basis::zPart(const arma::vec &zVec, int nz, bool use_mem = false) {
 
 ---
 
-# 3b - Optimisation du calcul de densité
+# III.1.b - Optimisation du calcul de densité
 
 ## 1 - Version naïve
 Classe `Chrono` qui affiche le temps sur stderr en fin de scope et un message.
@@ -446,7 +424,7 @@ arma::mat NuclearDensityCalculator::naive_method(const arma::vec& rVals, const a
 
 ---
 
-# 3b - Optimisation du calcul de densité
+# III.1.b - Optimisation du calcul de densité
 
 ## 3 - Optimisation 2 ...
 
@@ -471,7 +449,7 @@ arma::mat Basis::basisFunc_mem(int m, int n, int nz) {
 
 ---
 
-# 3b - Optimisation du calcul de densité
+# III.1.b - Optimisation du calcul de densité
 
 ## 4 - Notre solution ! 
 
@@ -507,7 +485,7 @@ NB : Les définitions ne sont pas là, mais il faut fournir au "factoriseur" les
 
 ---
 
-# 3b - Optimisation du calcul de densité
+# III.1.b - Optimisation du calcul de densité
 
 ## 4 - Notre solution ! 
 
@@ -543,7 +521,7 @@ return builder->GetResult();
 
 ---
 
-# 3b - Optimisation du calcul de densité
+# III.1.b - Optimisation du calcul de densité
 
 ## 5 - Conclusion sur notre approche
 
@@ -571,7 +549,43 @@ On se rendra compte dans les benchmarks qu'on est surtout "memory bound".
 
 ---
 
+class: toc top
+
 # III.2 - Benchmarks
+
+## 1 - Méthode naïve non mémoïsée
+
+18 secondes en moyenne sur 4 exécutions.
+
+--
+
+## 2 - Méthode naïve mémoisée 
+
+8 secondes en moyenne sur 4 exécutions.
+
+--
+
+## 3 - Méthode la plus optimisée single thread
+
+Environ 6ms en moyenne sur 1000 exécutions. La méthode `optimized_method3` est `const`, ses appels sont indépentants.
+
+--
+
+## 4 - Méthode la plus optimisée + openMP
+
+Environ 1,8ms sur une moyenne de 1000 exécutions.
+
+Dans ce temps, on a passé en moyenne 1.10 ms dans les factorisations dont 0.4 dans la factorisation initiale.
+
+Cet overhead est indépendant du nombre de points. On a un speedup de 10 000. 
+
+Si on multiplie le nombre de points par 4, on a une durée d'exécution de 3.9 ms en moyenne contre 52 secondes pour la naïve soit un speedup de 13 000. On peut extrapoler qu'asymptotiquement il restera proche. Cependant les tests deviennent extrêmenent longs, même en utilisant des méthodes intermédiaires.
+
+NB : Nous n'avons pas utilisé -Ofast pour le test de la méthode naïve car il nous semblait que GCC tentait de mettre des threads dans notre code et on avait une consommation systématique du CPU de 100%. Son impact est de l'ordre de 20% sur la méthode la plus optimisée.
+
+Les flags utilisés pour le dernier tests étaient : `-march=native -mtune=native -Ofast -flto -fopenmp`.
+
+--- 
 
 ---
 
