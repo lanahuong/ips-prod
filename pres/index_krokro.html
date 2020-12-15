@@ -257,13 +257,13 @@ $(OBJECTS): obj/%.o : src/%.cpp $(SOURCES) $(ALL_HEADERS)
 
 # v - Documentation
 
-![](images/index.png)
+
 
 ---
 
 # v - Documentation
 
-![](images/orthocheck.png)
+
 
 ---
 
@@ -305,170 +305,12 @@ TODO : Ajout des tests unitaires pour l'implémentation naïve
 
 ---
 
-# III.1 - Code
 
-```markdown
-void Derivator::differentiateTwice(arma::mat &m) {
-        arma::uword n = m.n_cols;
-        arma::mat M1 = m;
-        arma::mat M2 = m;
-
-        if (likely(n > 2)) {
-
-            M1.shed_col(0);
-            M1.insert_cols(n - 1, 1);
-            
-            M2.shed_col(n - 1);
-            M2.insert_cols(0, 1);
-        
-            m = (M1 + M2 - 2 * m) / (STEP * STEP);
-        }
-
-        else {
-
-            m = arma::zeros(size(m));
-        }
-}
-```
-
-
-
-`$$ (x_1, x_2, ... , x_n)  \longrightarrow (\frac{0 + x_2 - 2  x_1}{h^2}, \frac{x_1 + x_3 - 2  x_2}{h^2}, ... , \frac{x_{n-1} + 0 -2  x_n}{h^2})   $$`
----
-
-# III.1 - Code
-
-```markdown
-void Derivator::correctBounds(arma::mat &m) {
-    arma::uword n = m.n_cols;
-
-    if (likely(n > 2)) {
-
-        m.shed_col(n - 1);
-        m.shed_col(0);
-    }
-}
-```
-
-`$$  (\frac{0 + x_2 - 2  x_1}{h^2}, \frac{x_1 + x_3 - 2  x_2}{h^2},\frac{x_2 + x_4 - 2  x_3}{h^2}, ... ,\frac{x_{n-2} + x_n -2  x_{n-1}}{h^2}, \frac{x_{n-1} + 0 -2  x_n}{h^2}) \\[0.4cm] \downarrow \\[0.4cm]  
-(\frac{x_1 + x_3 - 2  x_2}{h^2}, \frac{x_2 + x_4 - 2  x_3}{h^2}, ... , \frac{x_{n-2} + x_n -2  x_{n-1}}{h^2})  $$`
----
-
-class: top
-
-# III.2 - Quadrature
-
-On veut vérifier que `$ I_{a, b} = \delta_{a, b} $` avec :
-`$$ I_{a, b} = \int \psi_a \psi_b \text{e}^{-\alpha z^2} = k_a k_b \int_{z_\text{min}}^{z_\text{max}}  H_a(z)H_b(z) \text{e}^{-\alpha z^2} \text{d}z $$`
-où on a noté `$\alpha = \frac{m \omega}{h}$` et `$k_a = \frac{1}{\sqrt{2^a a!}}{\left(\frac{\alpha}{\pi} \right)}^{\frac{1}{4}} $`.
---
-Après un changement de variable (formaliste mais inutile si on prend tous les paramètres égaux à 1 de toutes façons...), on a :
-`$$ I_{a, b} = k_a k_b \int_{\sqrt{\alpha}z_\text{min}}^{\sqrt{\alpha}z_\text{max}}  H_a(z)H_b(z) \text{e}^{-z^2} \frac{\text{d}z}{\alpha} = k_a k_b \sum_{i = 0}^{N-1} \omega_i  H_a\left(\frac{x_i}{\sqrt{\alpha}} \right)H_b\left(\frac{x_i}{\sqrt{\alpha}} \right)    $$`
---
-
-* `$k_n$` = `pseudoFactorials.at(n)`
-* `$Vect \left( H_n\left(\frac{x_i}{\sqrt{\alpha}} \right), \forall i \in [0, N-1]   \right)$`   = `hermiteMatrix.row(n)`
-* `$Vect \left( \omega_i , \forall i \in [0, N-1]  \right)$` = `getWeightVector()`
-
---
-
-Pour la quadrature : `make coefs`
-
+# III.1 - Optimisation du calcul de densité
 
 ---
 
-class: top
-
-# III.2 - Quadrature - Profilage du code
-
-Valeurs pré-calculables indépendantes de `$I_{a, b} $` -> classe instanciée:
-
---
-
-Maximum de constantes dans `constants.h` et `hermiteCoefs.h` > "constant folding"
-
---
-
-![](images/prof100.png)
-
-
-![](images/prof1000.png)
-
-
----
-# III.3 - Tests unitaires
-
-GoogleTest
-
---
-
-Tests paramétrés
-
---
-
-.numbers[
-```c++
-/**
- * @struct define the parameter of SolutionBoundedTest
- */
-struct solution_bounded_state {
-    double zmin;
-    double zmax;
-    uint n;
-    // expected number of rows in the resulting matrix
-    uint length;
-
-    /**
-     * @brief format when printing a solution_bounded_state object
-     */
-    friend std::ostream &operator<<(std::ostream &os, const solution_bounded_state &state)
-    {
-      os << "zmin=" << state.zmin << "; zmax=" << state.zmax;
-      os << "; n=" << state.n << "; length=" << state.length << "}\n";
-      return os;
-    }
-};
-```
-]
-
----
-
-# III.3 - Tests unitaires
-
-.numbers[
-```cpp
-/**
- * @class SolutionBoundedTest
- * This class defines parameterized tests using instances of solution_bounded_state as parameter
- */
-class SolutionBoundedTest : public testing::TestWithParam<solution_bounded_state> {
- public:
-  SolutionBoundedTest()
-  = default;;
-};
-
-/**
- * @brief Creates an instance of SolutionBoundedTest that will run the given test
- */
-TEST_P(SolutionBoundedTest, solutionSize)
-{
-  solution_bounded_state state = GetParam();
-  arma::mat result = SolverSchrodinger::solve1D(state.zmin, state.zmax, state.n);
-
-  EXPECT_EQ(state.n + 1, result.n_rows);
-  EXPECT_EQ(state.length, result.n_cols);
-}
-
-/**
- * Run all SolutionBoundedTest tests with given values
- */
-INSTANTIATE_TEST_SUITE_P(BasicCases, SolutionBoundedTest, testing::Values(
-    solution_bounded_state{-1, 1, 1, uint((2 / STEP) + 1)},
-    solution_bounded_state{-10, 10, 1, uint((20 / STEP) + 1)},
-    solution_bounded_state{-1, 1, 4, uint((2 / STEP) + 1)}
-));
-```
-]
+# III.2 - Benchmarks
 
 ---
 
@@ -484,23 +326,51 @@ INSTANTIATE_TEST_SUITE_P(BasicCases, SolutionBoundedTest, testing::Values(
 
 class: center
 
-# V - Résultats
+# V.1 - Passage en coordonnées cartésiennes
 
-.w80.hcenter[
-![](images/Figure_1.png)
-]
+$x^2 + y^2 = R^2$
 
+$\sqrt{x^2 + y^2} = R$
+
+$r \in [r_0, ..., r_n]$ tel que $|r-R|$ est minimal
+
+cube[x,y,\_] = mat(r,\_)
 
 ---
 
-class: center
+# V.2 - Résultats POVray
 
-# V - Résultats
-
-.w60.hcenter[
-![](images/gcov.png)
+.w70.hcenter[
+![](images/visu.png)
 ]
 
+---
+# Densité en fonction de r et z
+
+![](images/density-r-z.png)
+
+---
+# Script gnuplot
+
+```
+set datafile separator comma
+
+load 'scripts/magma.pal'
+
+set xrange [-20 :20 ]
+set yrange [-10 : 10]
+set size ratio 0.5
+
+set terminal png size 600,300
+set output "tmp/density-r-z.png"
+
+set title "Intensité de la densité nucléaire en fonction de z et r"
+set xlabel "z (fm)"
+set ylabel "r (fm)"
+set tics nomirror out scale 1
+
+plot "tmp/density-r-z.csv" matrix u (40*($1-32)/63):(20*($2-16)/31):3 with image notitle
+```
 
 
 
