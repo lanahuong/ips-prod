@@ -37,12 +37,10 @@ Presentation template - N. Dubray - ENSIIE - 2020 - [:book:](../index.html)
 
 class: toc top
 # Table des matières
---
 
 1. Présentation du projet
     1. Le problème
-    2. Physique
-    3. Structure 
+    2. Structure 
 --
 
 2. Solution
@@ -51,9 +49,8 @@ class: toc top
 --
 
 3. Optimisation et Benchmarks
-    1. Code
-    2. Quadrature
-    3. Tests unitaires
+    1. Optimisation du calcul de densité
+    2. Benchmarks
 --
 
 4. Git
@@ -61,37 +58,38 @@ class: toc top
 --
 
 5. Résultats
-
+    1. Passage aux coordonnées cartésiennes
+    2. POVray & gnuplot
 
 ---
 
 # I.1 - Le problème 
 
-.center[
-On veut calculer une densité nucléaire locale dans le plan à l'aide de la formule suivante :
+On veut calculer une densité nucléaire locale à l'aide de la formule suivante :
  
 ​
 
 `$$\rho(\mathbf{r})\equiv \sum_a \sum_b \rho_{ab}\psi_a(\mathbf{r})\psi^*_b(\mathbf{r})$$`
-]
 
-
----
-
-# I.2 - Physique
+--
 
 Pour cela, nous avons eu besoin de calculer :
 .center[
 `$$\psi_{m,n,n_z}(r_\perp, \theta, z) = Z(z, n_z) . R(r_\perp, m, n) . e^{im\theta}$$`
 ]
 
-Et donc, implémenter les fonctions suivantes, nécessitant respectivement le calcul de polynômes de Laguerre et de Hermite :
+--
 
+Et donc, implémenter les fonctions suivantes, nécessitant respectivement le calcul de polynômes :
+
+de Laguerre
 .center[
 `$$Z(z, n_z) = \frac{1}{\sqrt{b_z}} \frac{1}{\sqrt{2^{n_z} \sqrt{\pi}n_z!}} e^{-\frac{z^2}{2b_z^2}}H_{n_z}\left(\frac{z}{b_z}\right)$$`
 ]
 
-et
+--
+
+et de Hermite
 
 .center[
 `$$R(r_\perp, m, n) = \frac{1}{b_{\perp}\sqrt{\pi}} \sqrt{\frac{n!}{(n+|m|)!}} e^{-\frac{r_{\perp}^2}{2b_{\perp}^2}} \left(\frac{r_{\perp}}{b_{\perp}}\right)^{|m|} L_n^{|m|}\left(\frac{r_{\perp}^2}{b_{\perp}^2}\right).$$`
@@ -101,7 +99,7 @@ et
 
 class: toc top
 
-# I.3 - Structure 
+# I.2 - Structure 
 
 i. `Arborescence`
 
@@ -115,8 +113,11 @@ iii. `Chaîne de compilation`
 
 --
 
-iv. `Documentation`
+iv. `Makefile`
 
+--
+
+v. `Documentation`
 
 ---
 
@@ -188,7 +189,56 @@ Tous les modules doivent être déclarés au préalale dans les fichiers `module
 
 ---
 
-# iv - Documentation
+#iv - Makefile
+
+```Makefile
+CC = g++ -std=c++11 -fopenmp
+LD = $(CC) -std=c++11 -larmadillo
+CFLAGS = -Wall -Wextra -O2 -I /usr/local/include -march=native -mtune=native
+TEST_CFLAGS += $(CFLAGS) -I$(FUSED_GTEST_TMP_DIR) -larmadillo -Og -DGTEST_HAS_PTHREAD=0
+LDFLAGS = -Wall -Wextra -larmadillo
+``` 
+
+--
+
+```Makefile
+BINDIR = bin
+OBJDIR = obj
+SRCDIR = src
+DOCDIR = doc
+TEST_SRCDIR = tests
+FUSED_GTEST_TMP_DIR = tmp
+GTEST_SRC = gtest
+
+TARGET = $(BINDIR)/nuclearDensity
+TEST_TARGET = $(BINDIR)/tests
+
+all : makedirs $(TARGET)
+``` 
+--
+
+```Makefile
+MAIN_SRC = $(addprefix $(SRCDIR)/, $(MAIN:=.cpp))
+MAIN_OBJ = $(addprefix $(OBJDIR)/, $(MAIN:=.o))
+SOURCES = $(addprefix $(SRCDIR)/, $(MODULES:=.cpp))
+OBJECTS = $(addprefix $(OBJDIR)/, $(MODULES:=.o))
+ALL_OBJECTS = $(OBJECTS) $(MAIN_OBJ)
+ALL_HEADERS = $(addprefix $(SRCDIR)/, $(ORPHANED_HEADERS:=.h))
+ALL_SOURCES = $(SOURCES) $(MAIN_SRC)
+
+$(TARGET) : $(ALL_OBJECTS) $(ALL_SOURCES) $(ALL_HEADERS)
+	$(LD) $(LDFLAGS) -o $@ $(ALL_OBJECTS)
+
+$(MAIN_OBJ): obj/%.o : src/%.cpp $(MAIN_SRC)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(OBJECTS): obj/%.o : src/%.cpp $(SOURCES) $(ALL_HEADERS)
+	$(CC) $(CFLAGS) -c -o $@ $<
+```
+
+---
+
+# v - Documentation
 
 --
 * Doxygen
@@ -205,13 +255,13 @@ Tous les modules doivent être déclarés au préalale dans les fichiers `module
 
 ---
 
-# iv - Documentation
+# v - Documentation
 
 ![](images/index.png)
 
 ---
 
-# iv - Documentation
+# v - Documentation
 
 ![](images/orthocheck.png)
 
