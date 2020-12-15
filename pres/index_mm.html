@@ -1,0 +1,414 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Presentation template</title>
+    <meta charset="utf-8"/>
+    <link href="core/fonts/mono.css" rel="stylesheet" type="text/css">
+    <link href="core/css/animate.css" rel="stylesheet" type="text/css">
+    <link href="core/css/style_core.css" rel="stylesheet" type="text/css">
+    <link href="core/css/mermaid.css" rel="stylesheet" type="text/css">
+    <link href="core/css/gitgraph.css" rel="stylesheet" type="text/css">
+    <link href="core/css/style_ensiie.css" rel="stylesheet" type="text/css">
+    <link href="core/css/katex.css" rel="stylesheet" type="text/css">
+    <link href="core/css/asciinema-player.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<textarea id="source" readonly>
+
+
+
+# 3a - Optimisations préliminaires
+
+## 1 - Polynômes de Laguerre
+
+Définition par une relation de récurrence d'ordre 2 : 
+
+`$$ L^{m}_{n}(\eta)=\left(2+\frac{m-1-\eta}{n}\right)L^{m}_{n-1}(\eta)-\left(1+\frac{m-1}{n}\right)L^{m}_{n-2}(\eta) $$`
+
+on remarque `$m$` et `$\eta$` constants, seul `$n$` variable. On peut travailler avec un `$\texttt{arma::cube}$` (liste de matrices = slice) et opérer directement entre ses slices : 
+
+```markdown{C++}
+    arma::cube lp = arma::cube(mMax, z.n_elem, nMax, arma::fill::ones);
+    ...
+    for (int depth = 2; depth < nMax; depth++)
+    {
+        arma::mat coef1(2 + (m * row_ones - col_ones * z.as_row() - 1) / depth);
+        arma::mat coef2(1 + (m - 1) / depth * row_ones);
+        lp.slice(depth) = coef1 % lp.slice(depth - 1) - coef2 % lp.slice(depth - 2);
+    }
+```
+
+`$\longrightarrow$` abstraction maximale et meilleure utilisation d'Armadillo.
+
+--
+
+## 2- Troncature de la base
+
+Le cours définit :
+`$$
+n_z^\textrm{max}(i) \equiv (N+2).Q^\frac{2}{3}+\frac{1}{2}-i.Q \text{ et } m^\textrm{max} \equiv \textrm{sup}\left\{i:n_z^\textrm{max}(i)\ge 1\right\}.
+$$`
+
+Mais avec `$Q > 0$` et de entiers naturels, on le réécrit en une seule ligne :
+
+```markdown{C++}
+static_cast<int>(floor((N + 2) * pow(Q, -1.0 / 3.0) - 0.5 * pow(Q, -1)));
+```
+
+
+---
+
+# 3a - Optimisations préliminaires
+
+## 3 - Calculs de zPart (et rPart).
+
+Version naïve (mais pas trop non plus) :
+
+```markdown{C++}
+arma::vec Basis::zPart(const arma::vec &zVec, int nz) {
+    double const_factor = pow(bz, -0.5) * pow(PI, -0.25);
+    for (int i = 1; i <= nz; i++) {
+        const_factor *= pow(2 * i, -0.5); // On a fait attention aux factorielles !
+    }
+    arma::vec squared_arg = arma::square(zVec / bz);
+    arma::vec exp = arma::exp(-squared_arg / 2.0);
+    poly.calcHermite(nz + 1, zVec / bz);
+    return const_factor * exp % poly.hermite(nz);
+}
+
+```
+
+Nouvelle version adaptée à notre contexte : beaucoup d'appels à zPart (et rPart), mais avec des arguments inconnus, mais zVec (et rVec) toujours les mêmes.
+
+* Nouveau constructeur optionnel pour activer la mémoïsation -> on ne casse pas les tests
+* Factorisation maximale du code -> nécessité de passer par des wrappers pour éviter les accidents
+* Ne jamais faire deux fois le même calcul
+
+```markdown{C++}
+arma::vec Basis::zPart_mem(int nz);        // Nouveau, s'occupe partiellement de la mémoisation
+
+arma::vec Basis::zPart(const arma::vec &zVec, int nz, bool use_mem = false) {
+    double const_factor = pow(bz, -0.5) * pow(PI, -0.25); 
+    for (int i = 1; i <= nz; i++) {
+        const_factor *= pow(2 * i, -0.5);
+    }
+    if (use_mem) {                                              // Nouveau
+        return const_factor * zexp_mem % poly_mem.hermite(nz);  // Nouveau
+    }               
+    arma::vec squared_arg = arma::square(zVec / bz);
+    arma::vec exp = arma::exp(-squared_arg / 2.0);
+    poly.calcHermite(nz + 1, zVec / bz);
+    return const_factor * exp % poly.hermite(nz);
+}
+```
+
+
+---
+
+# 3b - Optimisation du calcul de densité
+
+## 1 - Version naïve
+Classe Chrono qui affiche le temps sur stderr en fin de scope + le message.
+
+```markdown{C++}
+arma::mat NuclearDensityCalculator::naive_method(const arma::vec& rVals, const arma::vec& zVals)
+{
+    Chrono local("naive_method");
+    arma::mat result = arma::zeros(rVals.size(), zVals.size()); // number of points on r- and z- axes
+    for (int m = 0; m<basis.mMax; m++) 
+        for (int n = 0; n<basis.nMax(m); n++) 
+            for (int n_z = 0; n_z<basis.n_zMax(m, n); n_z++) 
+                for (int mp = 0; mp<basis.mMax; mp++) 
+                    for (int np = 0; np<basis.nMax(mp); np++) 
+                        for (int n_zp = 0; n_zp<basis.n_zMax(mp, np); n_zp++) {
+                            arma::mat funcA = basis.basisFunc(m, n, n_z, rVals, zVals);
+                            arma::mat funcB = basis.basisFunc(mp, np, n_zp, rVals, zVals);
+                            result += funcA%funcB*rho(m, n, n_z, mp, np, n_zp); }
+    return result;
+}
+```
+
+## 2 - Optimisation 1
+Prise en compte de `$\delta _{ma, mb} $`
+
+```markdown{C++}
+arma::mat NuclearDensityCalculator::naive_method(const arma::vec& rVals, const arma::vec& zVals)
+{
+    Chrono local("opti1");
+    arma::mat result = arma::zeros(rVals.size(), zVals.size()); // number of points on r- and z- axes
+    for (int m = 0; m<basis.mMax; m++) 
+        for (int n = 0; n<basis.nMax(m); n++) 
+            for (int n_z = 0; n_z<basis.n_zMax(m, n); n_z++) 
+                for (int np = 0; np<basis.nMax(mp); np++) 
+                    for (int n_zp = 0; n_zp<basis.n_zMax(mp, np); n_zp++) 
+                        arma::mat funcA = basis.basisFunc(m, n, n_z, rVals, zVals);
+                        arma::mat funcB = basis.basisFunc(mp, np, n_zp, rVals, zVals);
+                        result += funcA%funcB*rho(m, n, n_z, m, np, n_zp);}
+    return result;
+}
+```
+
+---
+
+# 3b - Optimisation du calcul de densité
+
+## 3 - Optimisation 2 ...
+
+On pourrait continuer ainsi, mais on tombe sur des problèmes :
+* Difficile d'appliquer les symétries sans jouer sur les indices de sommation
+* Après être arrivé à un speedup de 100 le code est illisible.
+* On accumule des matrices alors que qu'en fait elles sont faites avec deux vecteurs (on crée de la compléxité)
+
+```markdown{C++}
+arma::vec Basis::zPart_mem(int nz); 
+arma::vec Basis::rPart_mem(int m, int n);
+
+arma::mat Basis::basisFunc_mem(int m, int n, int nz) {
+    return rPart_mem(m, n).as_col() * zPart_mem(nz).as_row();
+}
+```
+
+* Interdépendance des boucles -> on aimerait bien factoriser d'abord par nz et nzp.
+* Le multithreading ne marche pas bien car "les boucles sur m ne sont pas équilibrées" -> gain de performance maximum de 50% en pratique
+
+
+
+---
+
+# 3b - Optimisation du calcul de densité
+
+## 4 - Notre solution ! 
+
+Faire tout ça a la fois tout en gardant une structure lisible ! On a du rajouter deux classe génériques :
+
+* Un "accumulateur thread safe bufferisé" dans le quel on peut envoyer les données (n'importe quel type et opération tant que c'est commutatif).
+
+```markdown{C++}
+ThreadSafeAccumulator builder<int>(0, operation_type::Add); // ou une lambda function
+builder.push(20982123);
+builder.GetResult();
+```
+
+* Un "factoriseur" générique simple d'utilisation (fonctionne un peu comme une base de données). 
+
+```markdown{C++}
+FactorisationHelper<struct quantum_numbers, int> nza_factored(select_nza, symmetry_filter);
+for (auto& nza_term : nza_factored) ... // on peut même itérer dessus !
+```
+
+Le code devient alors :
+```markdown{C++}
+FactorisationHelper<struct quantum_numbers, int> nza_factored(select_nza, symmetry_filter);
+    for (int m_a(0), m_amax(basis.mMax); m_a<m_amax; m_a++) { 
+        for (int n_a(0), n_amax(basis.nMax(m_a)); n_a<n_amax; n_a++) 
+            for (int nz_a(0), nz_amax(basis.n_zMax(m_a, n_a)); nz_a<nz_amax; nz_a++) 
+                for (int n_b(0), m_bmax(basis.nMax(m_a)); n_b<m_bmax; n_b++) 
+                    for (int nz_b(0), nz_bmax(basis.n_zMax(m_a, n_b)); nz_b<nz_bmax; nz_b++) 
+                        nza_factored.add({m_a, n_a, nz_a, m_a, n_b, nz_b, 1});
+```
+
+NB : Les définitions ne sont pas là, mais il faut fournir au "factoriseur" les structures de `quantum_number`, les fonctions pour tester l'égalité, le filtre d'entrée pour les symétries, pour les `select`, etc.
+
+---
+
+# 3b - Optimisation du calcul de densité
+
+## 4 - Notre solution ! 
+
+Une fois les données chargées, il ne reste plus qu'à dérouler le code et faire les calculs dans l'ordre souhaité, c'est-à-dire :
+
+1. `nz_a` pour zPart, le plus nested dans la boucle d'origine et le plus commun entre tous les termes
+2. `nz_b` idem pour zPart
+3. (`m_a`; `n_a`) pour rPart
+4. (`m_b`; `n_b`) pour rPart
+
+```markdown{C++}
+for (auto& nza_term : nza_factored) { 
+    arma::row nza_zpart(basis.zPart_mem(nza_term.factor));
+    ...
+    FactorisationHelper<quantum_numbers, int> nzb_factored(nza_term.factored_out, select_nzb);
+    for (auto& nzb_term : nzb_factored) {
+        arma::row nzb_zpart(basis.zPart_mem(nzb_term.factor));
+        ...
+        FactorisationHelper<quantum_numbers, m_n_pair> mana_factored(nzb_term.factored_out, select_mana);
+        for (auto& mana_term : mana_factored) {
+            arma::row mbnb_rpart(arma::zeros(rSize));
+            for (quantum_numbers e : mana_term.factored_out) 
+                mbnb_rpart += basis.rPart_mem(e.m_b, e.n_b)*(rho(e.m_a, e.n_a, ...)*e.count);
+            all_rpart += mbnb_rpart%mana_rpart;
+        }
+        tmp += all_rpart*nzb_zpart;
+    }
+    builder->push(tmp%(unit*nza_zpart)); // Seule matrice
+}
+return builder->GetResult();
+```
+
+
+---
+
+# 3b - Optimisation du calcul de densité
+
+## 5 - Conclusion sur le code
+
+Bénéfices :
+
+* ABSTRACTION : Possibilité d'utiliser la version naïve pour construire la somme (et d'effecter d'autres optimisations dessus)
+* On ne fait que des opérations vectorielles sauf à la fin pour construire la matrice
+* Factorisations maximales, irréalisables sans cette approche
+* Symétries gérées (voir variable `e.count`)
+* Fonctionne avec openMP et sans, threads équilibrés
+* Utilisation des fonctions `rPart` et `zPart` mémoïsées
+* Solution réutilisable dans d'autres problèmes
+
+Inconvénients :
+
+* Syntaxe un peu complexe pour la partie exploitation
+* Overhead (mais constant par rapport à la taille des vecteurs et `inférieur à la miliseconde ici`).
+
+On se rendra compte dans les benchmarks qu'on est surtout "memory bound".
+
+
+--- 
+
+
+</textarea>
+
+<script src="core/javascript/remark.js"></script>
+<script src="core/javascript/katex.min.js"></script>
+<script src="core/javascript/auto-render.min.js"></script>
+<script src="core/javascript/emojify.js"></script>
+<script src="core/javascript/mermaid.js"></script>
+<script src="core/javascript/jquery-2.1.1.min.js"></script>
+<script src="core/javascript/extend-jquery.js"></script>
+<script src="core/javascript/gitgraph.js"></script>
+<script src="core/javascript/plotly.js"></script>
+<script src="core/javascript/asciinema-player.js"></script>
+<script src="core/javascript/bokeh-2.2.1.min.js"></script>
+<script src="core/javascript/bokeh-widgets-2.2.1.min.js"></script>
+<script src="core/javascript/bokeh-tables-2.2.1.min.js"></script>
+<script src="core/javascript/bokeh-api-2.2.1.min.js"></script>
+
+<script>
+
+    // === Remark.js initialization ===
+    var slideshow = remark.create(
+        {
+            highlightStyle: 'monokai',
+            countIncrementalSlides: false,
+            highlightLines: false
+        });
+
+    // === Mermaid.js initialization ===
+    mermaid.initialize({
+        startOnLoad: false,
+        cloneCssStyles: false,
+        flowchart: {
+            height: 50
+        },
+        sequenceDiagram: {
+            width: 110,
+            height: 30
+        }
+    });
+
+    function initMermaid(s) {
+        var diagrams = document.querySelectorAll('.mermaid');
+        var i;
+        for (i = 0; i < diagrams.length; i++) {
+            if (diagrams[i].offsetWidth > 0) {
+                mermaid.init(undefined, diagrams[i]);
+            }
+        }
+    }
+
+    slideshow.on('afterShowSlide', initMermaid);
+    initMermaid(slideshow.getSlides()[slideshow.getCurrentSlideIndex()]);
+
+
+    // === Emojify.js initialization ===
+    emojify.run();
+
+    // KaTeX
+    renderMathInElement(document.body, {
+        delimiters: [{left: "$$", right: "$$", display: true}, {left: "$", right: "$", display: false}],
+        ignoredTags: ["script", "noscript", "style", "textarea", "pre"]
+    });
+
+
+    // Bokeh.js example #00
+
+    var plt = Bokeh.Plotting;
+
+    var pie_data = {
+        labels: ['Work', 'Eat', 'Commute', 'Sport', 'Watch TV', 'Sleep'],
+        values: [8, 2, 2, 4, 0, 8],
+    };
+
+    var p1 = Bokeh.Charts.pie(pie_data);
+    var p2 = Bokeh.Charts.pie(pie_data, {
+        inner_radius: 0.2,
+        start_angle: Math.PI / 2
+    });
+    var p3 = Bokeh.Charts.pie(pie_data, {
+        inner_radius: 0.2,
+        start_angle: Math.PI / 6,
+        end_angle: 5 * Math.PI / 6
+    });
+    var p4 = Bokeh.Charts.pie(pie_data, {
+        inner_radius: 0.2,
+        palette: "Oranges9",
+        slice_labels: "percentages"
+    });
+
+    // add the plot to a document and display it
+    var doc = new Bokeh.Document();
+    doc.add_root(plt.gridplot(
+        [[p1, p2], [p3, p4]],
+        {plot_width: 250, plot_height: 250}));
+    Bokeh.embed.add_document_standalone(doc, document.getElementById("bokeh00"));
+
+    // Bokeh.js example #01
+
+    var plt = Bokeh.Plotting;
+
+    var bar_data = [
+        ['City', '2010 Population', '2000 Population'],
+        ['NYC', 8175000, 8008000],
+        ['LA', 3792000, 3694000],
+        ['Chicago', 2695000, 2896000],
+        ['Houston', 2099000, 1953000],
+        ['Philadelphia', 1526000, 1517000],
+    ];
+
+    var p1 = Bokeh.Charts.bar(bar_data, {
+        axis_number_format: "0.[00]a"
+    });
+    var p2 = Bokeh.Charts.bar(bar_data, {
+        axis_number_format: "0.[00]a",
+        stacked: true
+    });
+    var p3 = Bokeh.Charts.bar(bar_data, {
+        axis_number_format: "0.[00]a",
+        orientation: "vertical"
+    });
+    var p4 = Bokeh.Charts.bar(bar_data, {
+        axis_number_format: "0.[00]a",
+        orientation: "vertical",
+        stacked: true
+    });
+
+    var doc = new Bokeh.Document();
+    doc.add_root(plt.gridplot(
+        [[p1, p2], [p3, p4]],
+        {plot_width: 250, plot_height: 250}));
+    Bokeh.embed.add_document_standalone(doc, document.getElementById("bokeh01"));
+
+    // ===== END =====
+
+</script>
+<script src="gitgraphs.js" type="text/javascript"></script>
+</body>
+</html>
+
