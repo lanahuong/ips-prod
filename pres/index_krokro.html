@@ -85,13 +85,18 @@ Pour cela, nous avons eu besoin de calculer :
 `$$\psi_{m,n,n_z}(r_\perp, \theta, z) = Z(z, n_z) . R(r_\perp, m, n) . e^{im\theta}$$`
 ]
 
-Et donc, implémenter les fonctions suivantes, nécessitant respectivement le calcul de polynômes de Laguerre et de Hermite :
+--
 
+Et donc, implémenter les fonctions suivantes, nécessitant respectivement le calcul de polynômes :
+
+de Laguerre
 .center[
 `$$Z(z, n_z) = \frac{1}{\sqrt{b_z}} \frac{1}{\sqrt{2^{n_z} \sqrt{\pi}n_z!}} e^{-\frac{z^2}{2b_z^2}}H_{n_z}\left(\frac{z}{b_z}\right)$$`
 ]
 
-et
+--
+
+et de Hermite
 
 .center[
 `$$R(r_\perp, m, n) = \frac{1}{b_{\perp}\sqrt{\pi}} \sqrt{\frac{n!}{(n+|m|)!}} e^{-\frac{r_{\perp}^2}{2b_{\perp}^2}} \left(\frac{r_{\perp}}{b_{\perp}}\right)^{|m|} L_n^{|m|}\left(\frac{r_{\perp}^2}{b_{\perp}^2}\right).$$`
@@ -115,7 +120,11 @@ iii. `Chaîne de compilation`
 
 --
 
-iv. `Documentation`
+iv. Makefile
+
+--
+
+v. `Documentation`
 
 ---
 
@@ -185,7 +194,9 @@ Approche modulaire
 
 Tous les modules doivent être déclarés au préalale dans les fichiers `module`.
 
---
+---
+
+#iv - Makefile
 
 ```Makefile
 CC = g++ -std=c++11 -fopenmp
@@ -214,7 +225,7 @@ all : makedirs $(TARGET)
 
 ---
 
-# iii - Chaîne de compilation
+# iv - Makefile
 
 ```Makefile
 CC = g++ -std=c++11 -fopenmp
@@ -260,7 +271,7 @@ $(OBJECTS): obj/%.o : src/%.cpp $(SOURCES) $(ALL_HEADERS)
 
 ---
 
-# iv - Documentation
+# v - Documentation
 
 --
 * Doxygen
@@ -277,13 +288,13 @@ $(OBJECTS): obj/%.o : src/%.cpp $(SOURCES) $(ALL_HEADERS)
 
 ---
 
-# iv - Documentation
+# v - Documentation
 
 ![](images/index.png)
 
 ---
 
-# iv - Documentation
+# v - Documentation
 
 ![](images/orthocheck.png)
 
