@@ -142,6 +142,24 @@ class: toc top
 
 5. `gtest`
 
+--
+
+```c
+Makefile                                // Makefile principal servant à compiler le code et la documentation
+README.md                               // 
+├── scripts/                            // Scripts python permettant de récupérer les visuels (résultats)
+    ├── csv_plotter.py
+    ├── generateHermiteCoefs.py
+├── src/                                // Sources
+    ├── NuclearDensityCalculator.cpp
+    ├── Basis.cpp
+    ├── main.cpp
+    ├── Saver.cpp
+    └── Poly.cpp
+├── tests/                              // Tests obligatoires et autres tests nous ayant semblé pertinents
+    ├── testsMandatory.cpp
+    ├── testNuclearDensityCalculator.cpp
+```
 
 ---
 
@@ -229,11 +247,15 @@ arma::mat NuclearDensityCalculator::naive_method(const arma::vec& rVals, const a
 }
 ```
 
+---
 
+#II.2 - Tests unitaires
+
+TODO : Ajout des tests unitaires pour l'implémentation naïve
 
 ---
 
-# 4 - Code
+# III.1 - Code
 
 ```markdown
 void Derivator::differentiateTwice(arma::mat &m) {
@@ -264,7 +286,7 @@ void Derivator::differentiateTwice(arma::mat &m) {
 `$$ (x_1, x_2, ... , x_n)  \longrightarrow (\frac{0 + x_2 - 2  x_1}{h^2}, \frac{x_1 + x_3 - 2  x_2}{h^2}, ... , \frac{x_{n-1} + 0 -2  x_n}{h^2})   $$`
 ---
 
-# 4 - Code
+# III.1 - Code
 
 ```markdown
 void Derivator::correctBounds(arma::mat &m) {
@@ -284,7 +306,7 @@ void Derivator::correctBounds(arma::mat &m) {
 
 class: top
 
-# 4 - Quadrature
+# III.2 - Quadrature
 
 On veut vérifier que `$ I_{a, b} = \delta_{a, b} $` avec :
 `$$ I_{a, b} = \int \psi_a \psi_b \text{e}^{-\alpha z^2} = k_a k_b \int_{z_\text{min}}^{z_\text{max}}  H_a(z)H_b(z) \text{e}^{-\alpha z^2} \text{d}z $$`
@@ -307,7 +329,7 @@ Pour la quadrature : `make coefs`
 
 class: top
 
-# 4 - Quadrature - Profilage du code
+# III.2 - Quadrature - Profilage du code
 
 Valeurs pré-calculables indépendantes de `$I_{a, b} $` -> classe instanciée:
 
@@ -324,7 +346,7 @@ Maximum de constantes dans `constants.h` et `hermiteCoefs.h` > "constant folding
 
 
 ---
-# 4 - Tests unitaires
+# III.3 - Tests unitaires
 
 GoogleTest
 
@@ -361,7 +383,7 @@ struct solution_bounded_state {
 
 ---
 
-# 4 - Tests unitaires
+# III.3 - Tests unitaires
 
 .numbers[
 ```cpp
@@ -400,7 +422,7 @@ INSTANTIATE_TEST_SUITE_P(BasicCases, SolutionBoundedTest, testing::Values(
 
 ---
 
-# 5 - Git
+# IV - Git
  Git History (tig)
 
  .hcenter.w83[
@@ -412,7 +434,7 @@ INSTANTIATE_TEST_SUITE_P(BasicCases, SolutionBoundedTest, testing::Values(
 
 class: center
 
-# 6 - Résultats
+# V - Résultats
 
 .w80.hcenter[
 ![](images/Figure_1.png)
@@ -423,7 +445,7 @@ class: center
 
 class: center
 
-# 6 - Résultats
+# V - Résultats
 
 .w60.hcenter[
 ![](images/gcov.png)
