@@ -149,7 +149,7 @@ class: top
 # iii - Chaîne de compilation
 
 Chaîne de compilation séparée en deux parties :
-* Solveur
+* NuclearDensity
 * GoogleTest
 
 --
@@ -211,28 +211,6 @@ $(OBJECTS): obj/%.o : src/%.cpp $(SOURCES) $(ALL_HEADERS)
 
 ---
 
-# v - Documentation
-
---
-* Doxygen
-
---
-* EXTRACT_PRIVATE = YES
-
---
-* INPUT += README.md
-* USE_MDFILE_AS_MAINPAGE = README.md
-
---
-* EXCLUDE = src/hermiteCoefs.h
-
----
-
-# v - Documentation
-
----
-
-
 # II.1 - Implémentation naïve
 
 .center[
@@ -267,7 +245,66 @@ arma::mat NuclearDensityCalculator::naive_method(const arma::vec& rVals, const a
 
 #II.2 - Tests unitaires
 
-TODO : Ajout des tests unitaires pour l'implémentation naïve
+```
+Running main() from gtest/googletest/src/gtest_main.cc
+[==========] Running 11 tests from 6 test suites.
+[----------] Global test environment set-up.
+[----------] 1 test from PolyClass
+[ RUN      ] PolyClass.Mandatory
+[       OK ] PolyClass.Mandatory (0 ms)
+[----------] 1 test from PolyClass (0 ms total)
+
+[----------] 1 test from Basis
+[ RUN      ] Basis.Mandatory
+[       OK ] Basis.Mandatory (0 ms)
+[----------] 1 test from Basis (0 ms total)
+
+[----------] 1 test from BasisRfuncs
+[ RUN      ] BasisRfuncs.Mandatory
+[       OK ] BasisRfuncs.Mandatory (0 ms)
+[----------] 1 test from BasisRfuncs (0 ms total)
+
+[----------] 1 test from BasisZfuncs
+[ RUN      ] BasisZfuncs.Mandatory
+[       OK ] BasisZfuncs.Mandatory (0 ms)
+[----------] 1 test from BasisZfuncs (1 ms total)
+
+```
+
+---
+
+#II.2 - Tests unitaires
+
+```
+[----------] 3 tests from NuclearDensityTest
+time in naive_method : 1.81332s
+[ RUN      ] NuclearDensityTest.optimized_method1
+time in optimized_method1 : 0.21387s
+[       OK ] NuclearDensityTest.optimized_method1 (214 ms)
+[ RUN      ] NuclearDensityTest.optimized_method2
+time in optimized_method2 : 0.110922s
+[       OK ] NuclearDensityTest.optimized_method2 (111 ms)
+[ RUN      ] NuclearDensityTest.optimized_method3
+time in optimized_method3 : 0.003302s
+[       OK ] NuclearDensityTest.optimized_method3 (3 ms)
+[----------] 3 tests from NuclearDensityTest (328 ms total)
+
+[----------] 4 tests from PointsWithYZero/DensityPointTest
+time in naive_method : 2.01144s
+[ RUN      ] PointsWithYZero/DensityPointTest.cartesianConversion/0
+[       OK ] PointsWithYZero/DensityPointTest.cartesianConversion/0 (1 ms)
+[ RUN      ] PointsWithYZero/DensityPointTest.cartesianConversion/1
+[       OK ] PointsWithYZero/DensityPointTest.cartesianConversion/1 (0 ms)
+[ RUN      ] PointsWithYZero/DensityPointTest.cartesianConversion/2
+[       OK ] PointsWithYZero/DensityPointTest.cartesianConversion/2 (1 ms)
+[ RUN      ] PointsWithYZero/DensityPointTest.cartesianConversion/3
+[       OK ] PointsWithYZero/DensityPointTest.cartesianConversion/3 (0 ms)
+[----------] 4 tests from PointsWithYZero/DensityPointTest (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 11 tests from 6 test suites ran. (4193 ms total)
+[  PASSED  ] 11 tests.
+```
 
 ---
 
