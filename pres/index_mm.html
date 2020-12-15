@@ -26,7 +26,7 @@ Définition par une relation de récurrence d'ordre 2 :
 
 `$$ L^{m}_{n}(\eta)=\left(2+\frac{m-1-\eta}{n}\right)L^{m}_{n-1}(\eta)-\left(1+\frac{m-1}{n}\right)L^{m}_{n-2}(\eta) $$`
 
-on remarque `$m$` et `$\eta$` constants, seul `$n$` variable. On peut travailler avec un `$\texttt{arma::cube}$` (liste de matrices = slice) et opérer directement entre ses slices : 
+on remarque `$m$` et `$\eta$` constants, seul `$n$` variable. On peut travailler avec un `$\texttt{arma::cube}$` (liste de matrices = `slice`) et opérer directement entre ses slices : 
 
 ```markdown{C++}
     arma::cube lp = arma::cube(mMax, z.n_elem, nMax, arma::fill::ones);
@@ -61,7 +61,7 @@ static_cast<int>(floor((N + 2) * pow(Q, -1.0 / 3.0) - 0.5 * pow(Q, -1)));
 
 # 3a - Optimisations préliminaires
 
-## 3 - Calculs de zPart (et rPart).
+## 3 - Calculs de `zPart` (et `rPart`).
 
 Version naïve (mais pas trop non plus) :
 
@@ -79,10 +79,10 @@ arma::vec Basis::zPart(const arma::vec &zVec, int nz) {
 
 ```
 
-Nouvelle version adaptée à notre contexte : beaucoup d'appels à zPart (et rPart), mais avec des arguments inconnus, mais zVec (et rVec) toujours les mêmes.
+Nouvelle version adaptée à notre contexte : beaucoup d'appels à `zPart` (et `rPart`), mais avec des arguments inconnus, mais `zVec` (et `rVec`) toujours les mêmes.
 
-* Nouveau constructeur optionnel pour activer la mémoïsation -> on ne casse pas les tests
-* Factorisation maximale du code -> nécessité de passer par des wrappers pour éviter les accidents
+* Nouveau constructeur optionnel pour activer la mémoïsation `$\longrightarrow$` on ne casse pas les tests
+* Factorisation maximale du code `$\longrightarrow$` nécessité de passer par des wrappers pour éviter les accidents
 * Ne jamais faire deux fois le même calcul
 
 ```markdown{C++}
@@ -109,7 +109,7 @@ arma::vec Basis::zPart(const arma::vec &zVec, int nz, bool use_mem = false) {
 # 3b - Optimisation du calcul de densité
 
 ## 1 - Version naïve
-Classe Chrono qui affiche le temps sur stderr en fin de scope + le message.
+Classe `Chrono` qui affiche le temps sur stderr en fin de scope et un message.
 
 ```markdown{C++}
 arma::mat NuclearDensityCalculator::naive_method(const arma::vec& rVals, const arma::vec& zVals)
@@ -157,8 +157,8 @@ arma::mat NuclearDensityCalculator::naive_method(const arma::vec& rVals, const a
 
 On pourrait continuer ainsi, mais on tombe sur des problèmes :
 * Difficile d'appliquer les symétries sans jouer sur les indices de sommation
-* Après être arrivé à un speedup de 100 le code est illisible.
-* On accumule des matrices alors que qu'en fait elles sont faites avec deux vecteurs (on crée de la compléxité)
+* Après être arrivé à un speedup de 100 le code devient vraiment méconnaissable.
+* On somme des matrices alors que qu'elles ne sont faites avec deux vecteurs (on crée de la compléxité mais pas d'information) :
 
 ```markdown{C++}
 arma::vec Basis::zPart_mem(int nz); 
@@ -169,8 +169,8 @@ arma::mat Basis::basisFunc_mem(int m, int n, int nz) {
 }
 ```
 
-* Interdépendance des boucles -> on aimerait bien factoriser d'abord par nz et nzp.
-* Le multithreading ne marche pas bien car "les boucles sur m ne sont pas équilibrées" -> gain de performance maximum de 50% en pratique
+* Interdépendance des boucles `$\longrightarrow$` on aimerait bien factoriser d'abord par `nz` et `nzp`.
+* Le multithreading ne marche pas bien car "les boucles sur m ne sont pas équilibrées" `$\longrightarrow$` gain de performance maximum de 50% en pratique.
 
 
 
@@ -180,9 +180,9 @@ arma::mat Basis::basisFunc_mem(int m, int n, int nz) {
 
 ## 4 - Notre solution ! 
 
-Faire tout ça a la fois tout en gardant une structure lisible ! On a du rajouter deux classe génériques :
+Faire tout ça a la fois tout en gardant une structure lisible ! On a été ammené à rajouter deux classe génériques :
 
-* Un "accumulateur thread safe bufferisé" dans le quel on peut envoyer les données (n'importe quel type et opération tant que c'est commutatif).
+* Un "accumulateur thread safe bufferisé" dans le quel on peut envoyer les données (et effectuer n'importe quel type et opération tant que c'est commutatif).
 
 ```markdown{C++}
 ThreadSafeAccumulator builder<int>(0, operation_type::Add); // ou une lambda function
@@ -208,7 +208,7 @@ FactorisationHelper<struct quantum_numbers, int> nza_factored(select_nza, symmet
                         nza_factored.add({m_a, n_a, nz_a, m_a, n_b, nz_b, 1});
 ```
 
-NB : Les définitions ne sont pas là, mais il faut fournir au "factoriseur" les structures de `quantum_number`, les fonctions pour tester l'égalité, le filtre d'entrée pour les symétries, pour les `select`, etc.
+NB : Les définitions ne sont pas là, mais il faut fournir au "factoriseur" les structures de `quantum_number`, les fonctions pour tester l'égalité, le filtre d'entrée pour les symétries, pour les `select`. Un grand travail a été réalisé pour minimiser son overhead et la localité des données.
 
 ---
 
@@ -250,25 +250,26 @@ return builder->GetResult();
 
 # 3b - Optimisation du calcul de densité
 
-## 5 - Conclusion sur le code
+## 5 - Conclusion sur notre approche
 
 Bénéfices :
 
 * ABSTRACTION : Possibilité d'utiliser la version naïve pour construire la somme (et d'effecter d'autres optimisations dessus)
 * On ne fait que des opérations vectorielles sauf à la fin pour construire la matrice
-* Factorisations maximales, irréalisables sans cette approche
+* Factorisations maximales, irréalisables (raisonnablement) sans cette approche
 * Symétries gérées (voir variable `e.count`)
-* Fonctionne avec openMP et sans, threads équilibrés
-* Utilisation des fonctions `rPart` et `zPart` mémoïsées
+* Fonctionne avec openMP ou les threads natifs et les threads sont équilibrés `$\longrightarrow$` "scalability"
+* Utilisation des méthodes `rPart` et `zPart` mémoïsées
 * Solution réutilisable dans d'autres problèmes
+* Solveur `const` `$\longrightarrow$` benchmarks non biaisés
 
 Inconvénients :
 
-* Syntaxe un peu complexe pour la partie exploitation
-* Overhead (mais constant par rapport à la taille des vecteurs et `inférieur à la miliseconde ici`).
+* Syntaxe un peu complexe pour la partie exploitation à cause des templates
+* Nécessité de définir pas mal de structures et fonctions pour "spécifier" le factoriseur au problème.
+* Overhead (mais constant par rapport à la taille des vecteurs et `inférieur à la miliseconde ici` donc pas trop mal).
 
 On se rendra compte dans les benchmarks qu'on est surtout "memory bound".
-
 
 --- 
 
