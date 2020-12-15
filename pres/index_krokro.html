@@ -216,33 +216,7 @@ TEST_TARGET = $(BINDIR)/tests
 
 all : makedirs $(TARGET)
 ``` 
-
----
-
-# iv - Makefile
-
-```Makefile
-CC = g++ -std=c++11 -fopenmp
-LD = $(CC) -std=c++11 -larmadillo
-CFLAGS = -Wall -Wextra -O2 -I /usr/local/include -march=native -mtune=native
-TEST_CFLAGS += $(CFLAGS) -I$(FUSED_GTEST_TMP_DIR) -larmadillo -Og -DGTEST_HAS_PTHREAD=0
-LDFLAGS = -Wall -Wextra -larmadillo
-``` 
-
-```Makefile
-BINDIR = bin
-OBJDIR = obj
-SRCDIR = src
-DOCDIR = doc
-TEST_SRCDIR = tests
-FUSED_GTEST_TMP_DIR = tmp
-GTEST_SRC = gtest
-
-TARGET = $(BINDIR)/nuclearDensity
-TEST_TARGET = $(BINDIR)/tests
-
-all : makedirs $(TARGET)
-``` 
+--
 
 ```Makefile
 MAIN_SRC = $(addprefix $(SRCDIR)/, $(MAIN:=.cpp))
