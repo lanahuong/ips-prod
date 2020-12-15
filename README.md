@@ -27,7 +27,7 @@ To run the unit tests you can run `bin/tests --gtest_color=yes`.
 To build only the tests use :
 
 ```
-make test
+make tests
 ```
 
 To generate the documentation, run from the root :
