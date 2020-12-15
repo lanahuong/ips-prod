@@ -46,9 +46,8 @@ class: toc top
 --
 
 2. Solution
-    1. Méthodes à implémenter
-    2. Implémentation naïve
-    3. Tests unitaires
+    1. Implémentation naïve
+    2. Tests unitaires
 --
 
 3. Optimisation et Benchmarks
@@ -101,21 +100,23 @@ et
 ---
 
 class: toc top
+
 # I.3 - Structure 
 
-i. Arborescence
+i. `Arborescence`
 
 --
 
-ii. Classes
+ii. `Classes`
 
 --
 
-iii. Chaîne de compilation
+iii. `Chaîne de compilation`
 
 --
 
-iv. Documentation
+iv. `Documentation`
+
 
 ---
 
@@ -195,6 +196,40 @@ Tous les modules doivent être déclarés au préalale dans les fichiers `module
 # iv - Documentation
 
 ![](images/orthocheck.png)
+
+---
+
+# II.1 - Implémentation naïve
+
+.center[
+`$$\rho(\mathbf{r}) = \sum_{m}\sum_{n}\sum_{n_z}\sum_{mp}\sum_{np}\sum_{n_{zp}}(\rho_{m, n, n_z, mp,np,n_{zp}}\psi_{m,n,n_z}(\mathbf{r})\psi^*_{mp,np,n_{zp}}(\mathbf{r}))$$`
+]
+
+```c++
+arma::mat NuclearDensityCalculator::naive_method(const arma::vec& rVals, const arma::vec& zVals)
+{
+    Chrono local("naive_method");
+    arma::mat result = arma::zeros(rVals.size(), zVals.size()); // number of points on r- and z- axes
+    for (int m = 0; m<basis.mMax; m++) {
+        for (int n = 0; n<basis.nMax(m); n++) {
+            for (int n_z = 0; n_z<basis.n_zMax(m, n); n_z++) {
+                for (int mp = 0; mp<basis.mMax; mp++) {
+                    for (int np = 0; np<basis.nMax(mp); np++) {
+                        for (int n_zp = 0; n_zp<basis.n_zMax(mp, np); n_zp++) {
+                            arma::mat funcA = basis.basisFunc(m, n, n_z, rVals, zVals);
+                            arma::mat funcB = basis.basisFunc(mp, np, n_zp, rVals, zVals);
+                            result += funcA%funcB*rho(m, n, n_z, mp, np, n_zp);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return result;
+}
+```
+
+
 
 ---
 
